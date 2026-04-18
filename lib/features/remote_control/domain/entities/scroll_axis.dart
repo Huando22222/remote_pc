@@ -1,0 +1,1 @@
+enum ScrollAxis { horizontal, vertical }
