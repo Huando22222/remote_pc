@@ -51,12 +51,12 @@ class _RemoteControlPageState extends ConsumerState<RemoteControlPage> {
           Expanded(
             child: TouchpadWidget(
               moveMouse: _moveMouse,
-              clickMouse: _leftClick,
-              rightClickMouse: _rightClick,
-              doubleClickMouse: _doubleClick,
+              leftClick: _leftClick,
+              rightClick: _rightClick,
+              doubleClick: _doubleClick,
               mouseDown: _mouseDown,
               mouseUp: _mouseUp,
-              scrollMouse: _scroll,
+              scroll: _scroll,
               swipe: _swipe,
             ),
           ),

@@ -57,6 +57,7 @@ class SocketClient {
 
   void emit(String event, dynamic data) {
     _socket?.emit(event, data);
+    _socket?.io.engine?.flush();
   }
 
   bool get isConnected => _socket?.connected ?? false;

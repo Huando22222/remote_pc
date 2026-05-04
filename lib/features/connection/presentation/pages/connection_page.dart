@@ -18,7 +18,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
   @override
   void initState() {
     super.initState();
-    ipController.text = '172.16.10.106';
+    ipController.text = '192.168.1.221';
   }
 
   @override
