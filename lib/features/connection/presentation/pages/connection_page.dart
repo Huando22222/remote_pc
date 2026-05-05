@@ -18,7 +18,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
   @override
   void initState() {
     super.initState();
-    ipController.text = '192.168.1.221';
+    ipController.text = '';
   }
 
   @override
@@ -41,12 +41,10 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
               controller: ipController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: "IP desktop",
+                hintText: "your IP desktop/macbook",
               ),
             ),
-
             const SizedBox(height: 16),
-
             ElevatedButton(
               onPressed: () {
                 ref
