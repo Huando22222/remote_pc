@@ -1,4 +1,4 @@
-package com.example.pc_remote
+package com.dev.remotepc
 
 import io.flutter.embedding.android.FlutterActivity
 
