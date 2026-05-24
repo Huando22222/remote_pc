@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pc_remote/common/widgets/drawer_widget.dart';
+import 'package:pc_remote/core/constants/app_constants.dart';
+import 'package:pc_remote/features/connection/presentation/notifier/connection_notifier.dart';
 import 'package:pc_remote/features/remote_control/domain/usecases/swipe_usecase.dart';
 import 'package:pc_remote/features/remote_control/presentation/widgets/touchpad_widget.dart';
 import '../../domain/usecases/move_mouse_usecase.dart';
@@ -18,45 +22,26 @@ class RemoteControlPage extends ConsumerStatefulWidget {
 }
 
 class _RemoteControlPageState extends ConsumerState<RemoteControlPage> {
-  // lấy usecase 1 lần duy nhất, không bị reset khi rebuild
-  late final MoveMouseUseCase _moveMouse;
-  late final LeftClickUseCase _leftClick;
-  late final RightClickUseCase _rightClick;
-  late final DoubleClickUseCase _doubleClick;
-  late final MouseDownUseCase _mouseDown;
-  late final MouseUpUseCase _mouseUp;
-  late final ScrollUseCase _scroll;
-  late final SwipeUseCase _swipe;
-
-  @override
-  void initState() {
-    super.initState();
-    _moveMouse = ref.read(moveMouseUseCaseProvider);
-    _leftClick = ref.read(leftClickUseCaseProvider);
-    _rightClick = ref.read(rightClickUseCaseProvider);
-    _doubleClick = ref.read(doubleClickUseCaseProvider);
-    _mouseDown = ref.read(mouseDownUseCaseProvider);
-    _mouseUp = ref.read(mouseUpUseCaseProvider);
-    _scroll = ref.read(scrollUseCaseProvider);
-    _swipe = ref.read(swipeUseCaseProvider);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Remote Touchpad")),
+      //ref.read(connectionNotifierProvider.notifier).disconnect();
+      drawer: DrawerWidget(),
+      appBar: AppBar(
+        title: const Text(AppConstants.appName),
+      ),
       body: Column(
         children: [
           Expanded(
             child: TouchpadWidget(
-              moveMouse: _moveMouse,
-              leftClick: _leftClick,
-              rightClick: _rightClick,
-              doubleClick: _doubleClick,
-              mouseDown: _mouseDown,
-              mouseUp: _mouseUp,
-              scroll: _scroll,
-              swipe: _swipe,
+              moveMouse: ref.read(moveMouseUseCaseProvider),
+              leftClick: ref.read(leftClickUseCaseProvider),
+              rightClick: ref.read(rightClickUseCaseProvider),
+              doubleClick: ref.read(doubleClickUseCaseProvider),
+              mouseDown: ref.read(mouseDownUseCaseProvider),
+              mouseUp: ref.read(mouseUpUseCaseProvider),
+              scroll: ref.read(scrollUseCaseProvider),
+              swipe: ref.read(swipeUseCaseProvider),
             ),
           ),
         ],

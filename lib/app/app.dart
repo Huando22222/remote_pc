@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/core/theme/theme_provider.dart';
 
 import '../core/theme/app_theme.dart';
 import 'router_provider.dart';
@@ -13,13 +14,14 @@ class App extends ConsumerWidget {
     //ref.read(socketIoServerProvider).start();
 
     final router = ref.watch(routerProvider);
+    final themeAsync = ref.watch(themeProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: themeAsync.value ?? ThemeMode.dark,
     );
   }
 }

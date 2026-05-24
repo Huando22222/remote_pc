@@ -1,5 +1,7 @@
 class AppConstants {
-  AppConstants._();
-  static const String serverId = 'LTC0001';
-  static const String appId = '64240276-3470-417c-a62a-e366b04726e4';
+  static const String appName = "Remote Desktop";
+
+  static const double qrSize = 250;
+
+  static const Duration reconnectDelay = Duration(seconds: 3);
 }

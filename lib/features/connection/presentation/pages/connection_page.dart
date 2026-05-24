@@ -53,7 +53,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
     final isConnected = ref.watch(connectionNotifierProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
+    final md = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: GestureDetector(
@@ -61,7 +61,11 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
           FocusScope.of(context).unfocus();
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: md.padding.top + 5,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
