@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/features/remote_control/domain/entities/scroll_delta.dart';
 import 'package:pc_remote/features/remote_control/domain/entities/swipe_gesture.dart';
 
@@ -50,3 +51,7 @@ class RemoteRepositoryImpl implements RemoteRepository {
     return datasource.swipeGesture(gesture);
   }
 }
+
+final remoteRepositoryProvider = Provider(
+  (ref) => RemoteRepositoryImpl(ref.read(remoteDatasourceProvider)),
+);

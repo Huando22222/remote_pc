@@ -1,8 +1,12 @@
 class SocketConstants {
   // Port
   static const int port = 2222;
-
   // Events
+  static const String eventConnection = 'connection';
+  static const String eventDisconnect = 'disconnect';
+  static const String eventServerDeviceInfo = 'server_device_info';
+  static const String eventClientDeviceInfo = 'client_device_info';
+  static const String eventRefreshDeviceInfo = 'refresh_device_info';
   static const String eventMouseMove = 'mouse_move';
   static const String eventMouseLeftClick = 'mouse_left_click';
   static const String eventMouseRightClick = 'mouse_right_click';

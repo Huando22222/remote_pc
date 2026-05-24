@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/repositories/connection_repository.dart';
 import '../datasources/connection_socket_datasource.dart';
 
@@ -21,3 +23,7 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
     return datasource.observeConnection();
   }
 }
+
+final connectionRepositoryProvider = Provider(
+  (ref) => ConnectionRepositoryImpl(ref.read(connectionDatasourceProvider)),
+);

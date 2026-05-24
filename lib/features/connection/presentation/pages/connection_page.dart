@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pc_remote/core/config/routes.dart';
-
-import '../../../../di/providers.dart';
+import 'package:pc_remote/features/connection/presentation/notifier/connection_notifier.dart';
 
 // ─────────────────────────────────────────────
 // Presentation Layer — ConnectionPage
@@ -61,46 +60,44 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
         onTap: () {
           FocusScope.of(context).unfocus();
         },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Header ──
-                _AppHeader(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Header ──
+              _AppHeader(),
 
-                const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-                // ── Feature Cards ──
-                _FeatureGrid(),
+              // ── Feature Cards ──
+              _FeatureGrid(),
 
-                const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-                // ── Connection Card ──
-                _ConnectionCard(
-                  ipController: _ipController,
-                  isConnected: isConnected,
-                  onConnect: _handleConnect,
-                  onScanQr: _openQrScanner,
-                ),
+              // ── Connection Card ──
+              _ConnectionCard(
+                ipController: _ipController,
+                isConnected: isConnected,
+                onConnect: _handleConnect,
+                onScanQr: _openQrScanner,
+              ),
 
-                const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-                // ── Help hint ──
-                Center(
-                  child: Text(
-                    'Đảm bảo điện thoại và máy tính\ncùng kết nối một mạng Wi-Fi',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurface.withOpacity(0.45),
-                      height: 1.6,
-                    ),
+              // ── Help hint ──
+              Center(
+                child: Text(
+                  'Đảm bảo điện thoại và máy tính\ncùng kết nối một mạng Wi-Fi',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurface.withOpacity(0.45),
+                    height: 1.6,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -402,52 +399,50 @@ class _ConnectionCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          // const SizedBox(height: 10),
 
-          // Divider
-          Row(
-            children: [
-              const Expanded(child: Divider()),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  'hoặc',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colorScheme.onSurface.withOpacity(0.4),
-                  ),
-                ),
-              ),
-              const Expanded(child: Divider()),
-            ],
-          ),
+          // // Divider
+          // Row(
+          //   children: [
+          //     const Expanded(child: Divider()),
+          //     Padding(
+          //       padding: const EdgeInsets.symmetric(horizontal: 12),
+          //       child: Text(
+          //         'hoặc',
+          //         style: TextStyle(
+          //           fontSize: 12,
+          //           color: colorScheme.onSurface.withOpacity(0.4),
+          //         ),
+          //       ),
+          //     ),
+          //     const Expanded(child: Divider()),
+          //   ],
+          // ),
 
-          const SizedBox(height: 10),
+          // const SizedBox(height: 10),
 
-          // QR Button
-          OutlinedButton.icon(
-            onPressed: onScanQr,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            icon: const Icon(Icons.qr_code_scanner_rounded),
-            label: const Text(
-              'Quét mã QR',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-            ),
-          ),
+          // // QR Button
+          // OutlinedButton.icon(
+          //   onPressed: onScanQr,
+          //   style: OutlinedButton.styleFrom(
+          //     padding: const EdgeInsets.symmetric(vertical: 13),
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(12),
+          //     ),
+          //   ),
+          //   icon: const Icon(Icons.qr_code_scanner_rounded),
+          //   label: const Text(
+          //     'Quét mã QR',
+          //     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+          //   ),
+          // ),
         ],
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// QR Scanner Page
-// ─────────────────────────────────────────────
+//MARK: QR Scanner Page
 
 class QrScannerPage extends StatefulWidget {
   const QrScannerPage({super.key, required this.onScanned});

@@ -1,64 +1,88 @@
 import 'dart:async';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
+
+import '../../core/constants/socket_constants.dart';
+
+final socketClientProvider = Provider((ref) {
+  final client = SocketClient();
+
+  ref.onDispose(client.dispose);
+
+  return client;
+});
 
 class SocketClient {
-  IO.Socket? _socket;
+  io.Socket? _socket;
 
   final _connectionController = StreamController<bool>.broadcast();
 
-  Stream<bool> get connectionStream async* {
-    // Emit trạng thái hiện tại trước
-    yield _socket?.connected ?? false;
+  io.Socket? get socket => _socket;
 
-    // Sau đó forward các event mới
+  bool get isConnected => _socket?.connected ?? false;
+
+  Stream<bool> get connectionStream async* {
+    yield _socket?.connected ?? false;
     yield* _connectionController.stream;
   }
 
   void connect(String ip) {
-    print("CONNECTING TO: $ip");
+    if (_socket?.connected == true) return;
 
-    _socket = IO.io(
-      "ws://$ip:2222",
-      IO.OptionBuilder()
+    _socket = io.io(
+      'ws://$ip:${SocketConstants.port}',
+      io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
           .enableForceNew()
           .build(),
     );
 
-    print("SOCKET CREATED");
-
     _socket!.onConnect((_) {
-      print("SOCKET CONNECTED");
       _connectionController.add(true);
     });
 
     _socket!.onDisconnect((_) {
-      print("SOCKET DISCONNECTED");
       _connectionController.add(false);
     });
 
-    _socket!.onConnectError((e) {
-      print("CONNECT ERROR: $e");
-    });
-
-    _socket!.onError((e) {
-      print("SOCKET ERROR: $e");
-    });
-
     _socket!.connect();
+  }
 
-    print("CONNECT CALLED");
+  void onConnection(
+    void Function(io.Socket socket) callback,
+  ) {
+    _socket?.onConnect((_) {
+      final socket = _socket;
+      if (socket != null) {
+        callback(socket);
+      }
+    });
+  }
+
+  void onDisconnect(
+    void Function(io.Socket socket) callback,
+  ) {
+    _socket?.onDisconnect((_) {
+      final socket = _socket;
+      if (socket != null) {
+        callback(socket);
+      }
+    });
+  }
+
+  void emit(String event, dynamic data) {
+    _socket?.emit(event, data);
+    _socket?.io.engine.flush();
   }
 
   void disconnect() {
     _socket?.disconnect();
   }
 
-  void emit(String event, dynamic data) {
-    _socket?.emit(event, data);
-    _socket?.io.engine?.flush();
+  void dispose() {
+    _socket?.dispose();
+    _connectionController.close();
   }
-
-  bool get isConnected => _socket?.connected ?? false;
 }

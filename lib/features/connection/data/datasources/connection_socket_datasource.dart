@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../socket/client/socket_client.dart';
 
 class ConnectionSocketDatasource {
@@ -17,3 +19,7 @@ class ConnectionSocketDatasource {
     return socketClient.connectionStream;
   }
 }
+
+final connectionDatasourceProvider = Provider(
+  (ref) => ConnectionSocketDatasource(ref.read(socketClientProvider)),
+);

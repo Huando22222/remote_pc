@@ -1,4 +1,4 @@
-import 'package:ltc/core/localization/app_strings.dart';
+import 'package:pc_remote/core/localization/app_strings.dart';
 
 class ViStrings extends AppStrings {
   ViStrings();

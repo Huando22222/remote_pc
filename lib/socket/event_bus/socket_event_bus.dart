@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../protocol/socket_message.dart';
 
 class SocketEventBus {
@@ -12,3 +14,5 @@ class SocketEventBus {
     return _controller.stream.where((event) => event.type == type);
   }
 }
+
+final eventBusProvider = Provider((ref) => SocketEventBus());

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/features/remote_control/domain/usecases/swipe_usecase.dart';
 import 'package:pc_remote/features/remote_control/presentation/widgets/touchpad_widget.dart';
-import '../../../../di/providers.dart';
 import '../../domain/usecases/move_mouse_usecase.dart';
 import '../../domain/usecases/left_click_usecase.dart';
 import '../../domain/usecases/right_click_usecase.dart';
@@ -39,7 +38,7 @@ class _RemoteControlPageState extends ConsumerState<RemoteControlPage> {
     _mouseDown = ref.read(mouseDownUseCaseProvider);
     _mouseUp = ref.read(mouseUpUseCaseProvider);
     _scroll = ref.read(scrollUseCaseProvider);
-    _swipe = ref.read(threeFingerSwipeUseCaseProvider);
+    _swipe = ref.read(swipeUseCaseProvider);
   }
 
   @override

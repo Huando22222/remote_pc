@@ -1,10 +1,16 @@
 import 'dart:async';
 
-import 'package:pc_remote/core/config/socket_constants.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/core/constants/socket_constants.dart';
 import 'package:pc_remote/features/remote_control/domain/entities/scroll_delta.dart';
 import 'package:pc_remote/features/remote_control/domain/entities/swipe_gesture.dart';
 
 import '../../../../socket/client/socket_client.dart';
+
+final remoteSocketDatasourceProvider = Provider<RemoteSocketDatasource>((ref) {
+  final socketClient = ref.watch(socketClientProvider);
+  return RemoteSocketDatasource(socketClient);
+});
 
 class RemoteSocketDatasource {
   final SocketClient socketClient;
@@ -49,3 +55,7 @@ class RemoteSocketDatasource {
     });
   }
 }
+
+final remoteDatasourceProvider = Provider(
+  (ref) => RemoteSocketDatasource(ref.read(socketClientProvider)),
+);
