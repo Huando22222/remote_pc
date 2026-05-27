@@ -1,6 +1,6 @@
 class SocketConstants {
   // Port
-  static const int port = 2222;
+
   // Events
   static const String eventConnection = 'connection';
   static const String eventDisconnect = 'disconnect';

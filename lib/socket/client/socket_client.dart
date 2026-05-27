@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/core/constants/api_constants.dart';
+import 'package:pc_remote/socket/handlers/device_socket_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../core/constants/socket_constants.dart';
@@ -15,7 +17,8 @@ final socketClientProvider = Provider((ref) {
 
 class SocketClient {
   io.Socket? _socket;
-
+  void Function(io.Socket socket)? _onConnected;
+  void Function(io.Socket socket)? _onDisconnected;
   final _connectionController = StreamController<bool>.broadcast();
 
   io.Socket? get socket => _socket;
@@ -31,7 +34,7 @@ class SocketClient {
     if (_socket?.connected == true) return;
 
     _socket = io.io(
-      'ws://$ip:${SocketConstants.port}',
+      'ws://$ip:${ApiConstants.socketPort}',
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -41,10 +44,20 @@ class SocketClient {
 
     _socket!.onConnect((_) {
       _connectionController.add(true);
+
+      final socket = _socket;
+      if (socket != null) {
+        _onConnected?.call(socket);
+      }
     });
 
     _socket!.onDisconnect((_) {
       _connectionController.add(false);
+
+      final socket = _socket;
+      if (socket != null) {
+        _onDisconnected?.call(socket);
+      }
     });
 
     _socket!.connect();
@@ -53,23 +66,13 @@ class SocketClient {
   void onConnection(
     void Function(io.Socket socket) callback,
   ) {
-    _socket?.onConnect((_) {
-      final socket = _socket;
-      if (socket != null) {
-        callback(socket);
-      }
-    });
+    _onConnected = callback;
   }
 
   void onDisconnect(
     void Function(io.Socket socket) callback,
   ) {
-    _socket?.onDisconnect((_) {
-      final socket = _socket;
-      if (socket != null) {
-        callback(socket);
-      }
-    });
+    _onDisconnected = callback;
   }
 
   void emit(String event, dynamic data) {

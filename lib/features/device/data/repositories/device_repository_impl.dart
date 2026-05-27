@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../domain/entities/device_entity.dart';
 import '../../domain/repositories/device_repository.dart';
 import '../datasources/device_datasource.dart';
@@ -9,22 +8,29 @@ final deviceRepositoryProvider = Provider<DeviceRepository>(
 );
 
 class DeviceRepositoryImpl implements DeviceRepository {
-  final DeviceDatasource datasource;
+  final DeviceDatasource _datasource;
 
-  DeviceRepositoryImpl(this.datasource);
+  DeviceRepositoryImpl(
+    this._datasource,
+  );
 
   @override
   Future<String> getLocalIp() {
-    return datasource.getLocalIp();
+    return _datasource.getLocalIp();
   }
 
   @override
   Future<List<String>> getAllLocalIps() {
-    return datasource.getAllLocalIps();
+    return _datasource.getAllLocalIps();
   }
 
   @override
   Future<DeviceEntity> getDeviceInfo() {
-    return datasource.getDeviceInfo();
+    return _datasource.getDeviceInfo();
+  }
+
+  @override
+  Future<void> sendClientDeviceInfo({required DeviceEntity device}) {
+    return _datasource.sendClientDeviceInfo(device: device);
   }
 }

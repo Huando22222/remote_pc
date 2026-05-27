@@ -6,4 +6,8 @@ abstract class DeviceRepository {
   Future<List<String>> getAllLocalIps();
 
   Future<DeviceEntity> getDeviceInfo();
+
+  Future<void> sendClientDeviceInfo({
+    required DeviceEntity device,
+  });
 }

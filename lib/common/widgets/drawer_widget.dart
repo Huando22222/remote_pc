@@ -1,58 +1,108 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pc_remote/core/config/routes.dart';
+import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
+import 'package:pc_remote/features/device/domain/entities/device_entity.dart';
+import 'package:pc_remote/features/device/presentation/providers/device_provider.dart';
+import 'package:pc_remote/features/device/presentation/providers/remote_device_provider.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 
-class DrawerWidget extends StatelessWidget {
+class DrawerWidget extends ConsumerWidget {
   const DrawerWidget({
     super.key,
-    this.deviceName = 'Huân PC',
   });
 
-  final String deviceName;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final cn = ref.read(connectionNotifierProvider.notifier);
+    final currentRoute = GoRouterState.of(context).matchedLocation;
+    final svDv = ref.watch(deviceProvider);
+    final rmtDv = ref.watch(remoteDeviceProvider);
 
     return Drawer(
       backgroundColor: cs.surface,
       child: SafeArea(
         child: Column(
+          spacing: AppSpacing.sm,
           children: [
-            _DrawerHeader(deviceName: deviceName),
-            const SizedBox(height: AppSpacing.sm),
+            // _Header(
+            //   serverDevice: rmtDv.first,
+            //   remoteDevice: svDv,
+            // ),
+            svDv.when(
+              data: (svDv) {
+                if (rmtDv.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return _Header(
+                  serverDevice: svDv,
+                  remoteDevice: rmtDv.first,
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             Expanded(
-              child: ListView(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                children: const [
-                  _DrawerItem(
-                    icon: FontAwesomeIcons.handPointer,
-                    label: 'Touchpad',
-                    isActive: true,
-                  ),
-                  _DrawerItem(
-                    icon: FontAwesomeIcons.keyboard,
-                    label: 'Keyboard',
-                  ),
-                  _DrawerItem(
-                    icon: FontAwesomeIcons.fileArrowUp,
-                    label: 'Send file',
-                  ),
-                  _DrawerItem(
-                    icon: FontAwesomeIcons.clipboard,
-                    label: 'Clipboard',
-                  ),
-                  _DrawerItem(
-                    icon: FontAwesomeIcons.volumeHigh,
-                    label: 'Media control',
-                  ),
-                ],
+                child: Column(
+                  children: [
+                    _DrawerItem(
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(Routes.touchpad);
+                      },
+                      icon: FontAwesomeIcons.handPointer,
+                      label: 'Touchpad',
+                      isActive: currentRoute == Routes.touchpad,
+                    ),
+                    _DrawerItem(
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(Routes.keyboard);
+                      },
+                      icon: FontAwesomeIcons.keyboard,
+                      label: 'Keyboard',
+                      isActive: currentRoute == Routes.keyboard,
+                    ),
+                    _DrawerItem(
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(Routes.fileTransfer);
+                      },
+                      icon: FontAwesomeIcons.fileArrowUp,
+                      label: 'Send file',
+                      isActive: currentRoute == Routes.fileTransfer,
+                    ),
+                    _DrawerItem(
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(Routes.clipboard);
+                      },
+                      icon: FontAwesomeIcons.clipboard,
+                      label: 'Clipboard',
+                      isActive: currentRoute == Routes.clipboard,
+                    ),
+                    _DrawerItem(
+                      onTap: () {},
+                      icon: FontAwesomeIcons.volumeHigh,
+                      label: 'Media control',
+                    ),
+                  ],
+                ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.sm),
               child: _DrawerItem(
+                onTap: () {
+                  cn.disconnect();
+                },
                 icon: FontAwesomeIcons.linkSlash,
                 label: 'Disconnect',
                 isDanger: true,
@@ -65,18 +115,18 @@ class DrawerWidget extends StatelessWidget {
   }
 }
 
-class _DrawerHeader extends StatelessWidget {
-  const _DrawerHeader({
-    required this.deviceName,
+class _Header extends StatelessWidget {
+  final DeviceEntity serverDevice;
+  final DeviceEntity remoteDevice;
+  const _Header({
+    required this.serverDevice,
+    required this.remoteDevice,
   });
-
-  final String deviceName;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(AppSpacing.sm),
@@ -95,7 +145,7 @@ class _DrawerHeader extends StatelessWidget {
               color: cs.primaryContainer,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
-            child: FaIcon(
+            child: Icon(
               FontAwesomeIcons.desktop,
               size: 20,
               color: cs.onPrimaryContainer,
@@ -107,7 +157,7 @@ class _DrawerHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'PC Remote',
+                  remoteDevice.deviceName,
                   style: tt.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -126,7 +176,7 @@ class _DrawerHeader extends StatelessWidget {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        deviceName,
+                        serverDevice.deviceName,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -148,52 +198,47 @@ class _DrawerItem extends StatelessWidget {
   const _DrawerItem({
     required this.icon,
     required this.label,
+    required this.onTap,
     this.isActive = false,
     this.isDanger = false,
   });
 
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
   final bool isActive;
   final bool isDanger;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
 
-    final iconColor = isDanger
+    final color = isDanger
         ? cs.error
         : isActive
             ? cs.primary
             : cs.onSurfaceVariant;
 
-    final textColor = isDanger
-        ? cs.error
-        : isActive
-            ? cs.primary
-            : cs.onSurface;
-
-    final bgColor = isActive ? cs.primaryContainer.withOpacity(0.55) : null;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
       ),
       child: ListTile(
-        dense: true,
-        minLeadingWidth: 24,
-        horizontalTitleGap: 12,
-        leading: FaIcon(icon, size: 17, color: iconColor),
+        selected: isActive,
+        selectedTileColor: cs.primaryContainer.withOpacity(0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        leading: Icon(icon, color: color),
         title: Text(
           label,
-          style: tt.bodyMedium?.copyWith(
-            color: textColor,
+          style: TextStyle(
+            color: color,
             fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
+        onTap: onTap,
       ),
     );
   }

@@ -2,17 +2,19 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/core/constants/socket_constants.dart';
+import 'package:pc_remote/core/extensions/device_ext.dart';
+import 'package:pc_remote/features/device/domain/entities/device_entity.dart';
+import 'package:pc_remote/socket/client/socket_client.dart';
 
 import '../models/device_model.dart';
 
-final deviceDatasourceProvider = Provider(
-  (ref) => DeviceDatasource(),
-);
-
 class DeviceDatasource {
   final DeviceInfoPlugin _deviceInfoPlugin;
+  final SocketClient socketClient;
 
-  DeviceDatasource({
+  DeviceDatasource(
+    this.socketClient, {
     DeviceInfoPlugin? deviceInfoPlugin,
   }) : _deviceInfoPlugin = deviceInfoPlugin ?? DeviceInfoPlugin();
 
@@ -89,4 +91,17 @@ class DeviceDatasource {
       lastSeen: DateTime.now(),
     );
   }
+
+  Future<void> sendClientDeviceInfo({required DeviceEntity device}) async {
+    socketClient.emit(
+      SocketConstants.eventClientDeviceInfo,
+      device.toJson(),
+    );
+  }
 }
+
+final deviceDatasourceProvider = Provider(
+  (ref) => DeviceDatasource(
+    ref.read(socketClientProvider),
+  ),
+);

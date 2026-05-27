@@ -1,4 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/features/device/domain/usecases/send_client_device_info_usecase.dart';
+import 'package:pc_remote/features/device/presentation/providers/device_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../core/constants/socket_constants.dart';
@@ -14,15 +18,21 @@ class DeviceSocketHandler {
 
   DeviceSocketHandler(this.ref);
 
-  void register(io.Socket socket) {
+  void register(io.Socket socket) async {
+    log('Registering device socket handlers');
     socket.on(
-      SocketConstants.eventServerDeviceInfo,
-      (data) {
+      SocketConstants.eventRefreshDeviceInfo,
+      (data) async {
+        log('Received device info: $data');
         final device = DeviceModel.fromJson(
           Map<String, dynamic>.from(data),
         );
 
         ref.read(remoteDeviceProvider.notifier).add(device);
+        final clientDevice = await ref.read(deviceProvider.future);
+        ref
+            .read(sendClientDeviceInfoUsecaseProvider)
+            .call(device: clientDevice);
       },
     );
   }
