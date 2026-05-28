@@ -33,10 +33,13 @@ final connectionRouterNotifierProvider =
   return ConnectionRouterNotifier(ref);
 });
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(connectionRouterNotifierProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: Routes.connection,
     refreshListenable: notifier,
     redirect: (context, state) {

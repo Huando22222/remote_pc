@@ -15,6 +15,9 @@ class SocketConstants {
   static const String eventMouseUp = 'mouse_up';
   static const String eventMouseScroll = 'mouse_scroll';
   static const String eventSwipe = 'swipe';
+
+  // MARK: FILE TRANSFER
+  static const String eventFilesAvailable = 'files_available';
   // Timeout
   static const int connectionTimeoutMs = 5000;
 }

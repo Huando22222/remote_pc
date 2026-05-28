@@ -1,455 +1,200 @@
 import 'package:flutter/material.dart';
 
 class InAppNotificationHelper {
+  InAppNotificationHelper._();
+
   static OverlayEntry? _currentOverlay;
 
-  // Medical/Healthcare Color Palette
-  static const Color medicalPrimary = Color(0xFF0077BE); // Xanh nước biển chính
-  static const Color medicalLight = Color(0xFF4DA6D6); // Xanh nhạt
-  static const Color medicalDark = Color(0xFF005A8C); // Xanh đậm
-  static const Color medicalAccent = Color(0xFF00A8E8); // Xanh accent
-  // Cập nhật lại Palette màu trong class InAppNotificationHelper
-  static const Color medicalSuccess = Color(
-    0xFF2E7D32,
-  ); // Xanh lá đậm (Success)
-  static const Color medicalWarning = Color(0xFFF9A825); // Vàng cam (Warning)
-  static const Color medicalError = Color(0xFFD32F2F); // Đỏ y tế (Error/Alert)
-  static const Color medicalInfo = Color(0xFF0288D1); // Xanh dương (Info)
+  static const Color _success = Color(0xFF1F8A4C);
+  static const Color _error = Color(0xFFD92D20);
+  static const Color _warning = Color(0xFFB7791F);
+  static const Color _info = Color(0xFF2563EB);
 
-  /// Hiển thị thông báo in-app với widget tùy chỉnh
-  static void show(
-    BuildContext context, {
-    required Widget child,
-    Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    VoidCallback? onDismiss,
-    bool autoDismiss = true,
-  }) {
-    // Dismiss notification hiện tại nếu có
-    dismiss();
-
-    final overlay = Overlay.of(context);
-
-    _currentOverlay = OverlayEntry(
-      builder: (context) => _InAppNotification(
-        child: child,
-        isDismissible: isDismissible,
-        showClose: showClose,
-        position: position,
-        onTap: onTap,
-        onDismiss: () {
-          dismiss();
-          onDismiss?.call();
-        },
-      ),
-    );
-
-    overlay.insert(_currentOverlay!);
-
-    // Auto dismiss sau duration
-    if (autoDismiss) {
-      Future.delayed(duration, () {
-        // ⭐ Kiểm tra lại overlay còn tồn tại không trước khi dismiss
-        if (_currentOverlay != null) {
-          dismiss();
-        }
-      });
-    }
-  }
-
-  /// Hiển thị thông báo với template mặc định
-  static void showDefault(
+  static void success(
     BuildContext context, {
     required String message,
-    String? title,
-    Color? backgroundColor,
-    Color? textColor,
-    IconData? icon,
-    Color? iconColor,
+    String title = 'Success',
     Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    VoidCallback? onDismiss,
-    double? height,
-    EdgeInsetsGeometry? padding,
-    bool autoDismiss = true,
-    double? fsTitle,
-    double? fsMessage,
   }) {
-    show(
+    _showTyped(
       context,
-      child: _DefaultNotificationContent(
-        message: message,
-        title: title,
-        backgroundColor: backgroundColor ?? medicalPrimary,
-        textColor: textColor ?? Colors.white,
-        icon: icon,
-        iconColor: iconColor,
-        position: position,
-        padding: padding,
-        fsTitle: fsTitle,
-        fsMessage: fsMessage,
-      ),
-      duration: duration,
-      isDismissible: isDismissible,
-      showClose: showClose,
-      position: position,
-      onTap: onTap,
-      onDismiss: onDismiss,
-      autoDismiss: autoDismiss,
-    );
-  }
-
-  /// Success notification - Y tế
-  static void showSuccess(
-    BuildContext context, {
-    required String message,
-    String? title,
-    Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    double? fsTitle,
-    double? fsMessage,
-  }) {
-    showDefault(
-      context,
+      title: title,
       message: message,
-      title: title ?? 'Thành công',
-      backgroundColor: medicalSuccess,
-      icon: Icons.check_circle,
-      iconColor: Colors.white,
+      color: _success,
+      icon: Icons.check_circle_rounded,
       duration: duration,
-      isDismissible: isDismissible,
-      showClose: showClose,
-      position: position,
-      onTap: onTap,
-      fsTitle: fsTitle,
-      fsMessage: fsMessage,
     );
   }
 
-  /// Error notification - Y tế
-  static void showError(
+  static void error(
     BuildContext context, {
     required String message,
-    String? title,
-    Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    double? fsTitle,
-    double? fsMessage,
+    String title = 'Error',
+    Duration duration = const Duration(seconds: 4),
   }) {
-    showDefault(
+    _showTyped(
       context,
+      title: title,
       message: message,
-      title: title ?? 'Lưu ý',
-      backgroundColor: medicalError,
-      icon: Icons.error,
-      iconColor: Colors.white,
+      color: _error,
+      icon: Icons.error_rounded,
       duration: duration,
-      isDismissible: isDismissible,
-      showClose: showClose,
-      position: position,
-      onTap: onTap,
-      fsTitle: fsTitle,
-      fsMessage: fsMessage,
     );
   }
 
-  /// Warning notification - Y tế
-  static void showWarning(
+  static void warning(
     BuildContext context, {
     required String message,
-    String? title,
-    Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    double? fsTitle,
-    double? fsMessage,
+    String title = 'Warning',
+    Duration duration = const Duration(seconds: 4),
   }) {
-    showDefault(
+    _showTyped(
       context,
+      title: title,
       message: message,
-      title: title ?? 'Cảnh báo',
-      backgroundColor: medicalWarning,
-      icon: Icons.warning,
-      iconColor: Colors.white,
+      color: _warning,
+      icon: Icons.warning_rounded,
       duration: duration,
-      isDismissible: isDismissible,
-      showClose: showClose,
-      position: position,
-      onTap: onTap,
-      fsTitle: fsTitle,
-      fsMessage: fsMessage,
     );
   }
 
-  /// Info notification - Y tế
-  static void showInfo(
+  static void info(
     BuildContext context, {
     required String message,
-    String? title,
+    String title = 'Info',
     Duration duration = const Duration(seconds: 3),
-    bool isDismissible = true,
-    bool showClose = false,
-    NotificationPosition position = NotificationPosition.top,
-    VoidCallback? onTap,
-    bool autoDismiss = true,
-    double? fsTitle,
-    double? fsMessage,
   }) {
-    showDefault(
+    _showTyped(
       context,
+      title: title,
       message: message,
-      title: title ?? 'Thông tin',
-      backgroundColor: medicalInfo,
-      icon: Icons.info,
-      iconColor: Colors.white,
+      color: _info,
+      icon: Icons.info_rounded,
       duration: duration,
-      isDismissible: isDismissible,
-      autoDismiss: autoDismiss,
-      showClose: showClose,
-      position: position,
-      onTap: onTap,
-      fsTitle: fsTitle,
-      fsMessage: fsMessage,
     );
   }
 
-  /// Dismiss notification hiện tại
   static void dismiss() {
     _currentOverlay?.remove();
     _currentOverlay = null;
   }
-}
 
-enum NotificationPosition { top, bottom }
+  static void _showTyped(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required Color color,
+    required IconData icon,
+    required Duration duration,
+  }) {
+    dismiss();
 
-class _InAppNotification extends StatefulWidget {
-  final Widget child;
-  final bool isDismissible;
-  final bool showClose;
-  final NotificationPosition position;
-  final VoidCallback? onTap;
-  final VoidCallback onDismiss;
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
 
-  const _InAppNotification({
-    required this.child,
-    required this.isDismissible,
-    required this.showClose,
-    required this.position,
-    this.onTap,
-    required this.onDismiss,
-  });
+    _currentOverlay = OverlayEntry(
+      builder: (context) {
+        final topPadding = MediaQuery.paddingOf(context).top;
 
-  @override
-  State<_InAppNotification> createState() => _InAppNotificationState();
-}
-
-class _InAppNotificationState extends State<_InAppNotification>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
+        return Positioned(
+          top: topPadding + 12,
+          left: 16,
+          right: 16,
+          child: _NotificationCard(
+            title: title,
+            message: message,
+            color: color,
+            icon: icon,
+            onClose: dismiss,
+          ),
+        );
+      },
     );
 
-    // Animation từ top hoặc bottom
-    _slideAnimation = Tween<Offset>(
-      begin: Offset(0, widget.position == NotificationPosition.top ? -1 : 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    overlay.insert(_currentOverlay!);
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward();
+    Future.delayed(duration, () {
+      if (_currentOverlay != null) dismiss();
+    });
   }
+}
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _NotificationCard extends StatelessWidget {
+  const _NotificationCard({
+    required this.title,
+    required this.message,
+    required this.color,
+    required this.icon,
+    required this.onClose,
+  });
 
-  void _dismiss() async {
-    await _controller.reverse();
-    widget.onDismiss();
-  }
+  final String title;
+  final String message;
+  final Color color;
+  final IconData icon;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: widget.position == NotificationPosition.top ? 0 : null,
-      bottom: widget.position == NotificationPosition.bottom ? 0 : null,
-      left: 0,
-      right: 0,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Material(
-            color: Colors.transparent,
-            child: GestureDetector(
-              onTap: widget.onTap,
-              onVerticalDragEnd: widget.isDismissible
-                  ? (details) {
-                      // Swipe to dismiss
-                      if (widget.position == NotificationPosition.top &&
-                          details.primaryVelocity! < -500) {
-                        _dismiss();
-                      } else if (widget.position ==
-                              NotificationPosition.bottom &&
-                          details.primaryVelocity! > 500) {
-                        _dismiss();
-                      }
-                    }
-                  : null,
-              child: Stack(
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x33000000),
+              blurRadius: 16,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Content
-                  Container(width: double.infinity, child: widget.child),
-
-                  // Close button
-                  if (widget.showClose)
-                    Positioned(
-                      top: widget.position == NotificationPosition.top
-                          ? null
-                          : 8,
-                      bottom: widget.position == NotificationPosition.bottom
-                          ? null
-                          : 8,
-                      right: 8,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        onPressed: _dismiss,
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black26,
-                          shape: const CircleBorder(),
-                        ),
-                      ),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Widget template mặc định
-class _DefaultNotificationContent extends StatelessWidget {
-  final String message;
-  final String? title;
-  final Color backgroundColor;
-  final Color textColor;
-  final IconData? icon;
-  final Color? iconColor;
-  final EdgeInsetsGeometry? padding;
-  final NotificationPosition position;
-  final double? fsTitle;
-  final double? fsMessage;
-
-  const _DefaultNotificationContent({
-    required this.message,
-    this.title,
-    required this.backgroundColor,
-    required this.textColor,
-    this.icon,
-    this.iconColor,
-    this.padding,
-    required this.position,
-    this.fsTitle,
-    this.fsMessage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final topPadding = mediaQuery.padding.top;
-    final bottomPadding = mediaQuery.padding.bottom;
-
-    return Container(
-      width: double.infinity,
-      padding: padding ??
-          EdgeInsets.fromLTRB(
-            16,
-            position == NotificationPosition.top ? topPadding : 12,
-            16,
-            position == NotificationPosition.bottom ? bottomPadding + 12 : 12,
-          ), // ⭐ Bỏ comment dòng này
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Icon
-          if (icon != null) ...[
-            Icon(icon, color: iconColor ?? textColor, size: 24),
-            const SizedBox(width: 12),
-          ],
-
-          // Content
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title != null) ...[
-                  Text(
-                    title!,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: fsTitle ?? 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-                Text(
-                  message,
-                  style: TextStyle(color: textColor, fontSize: fsMessage ?? 14),
-                ),
-              ],
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: onClose,
+              icon: const Icon(Icons.close_rounded),
+              color: Colors.white,
+              iconSize: 18,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 28,
+                minHeight: 28,
+              ),
             ),
-          ),
-
-          const SizedBox(width: 32),
-        ],
+          ],
+        ),
       ),
     );
   }

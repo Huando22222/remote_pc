@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/socket/client/socket_client.dart';
 import 'package:pc_remote/socket/handlers/device_socket_handler.dart';
+import 'package:pc_remote/socket/handlers/file_socket_handler.dart';
 
 import '../../domain/usecases/connect_usecase.dart';
 import '../../domain/usecases/disconnect_usecase.dart';
@@ -44,6 +45,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
 
       socketClient.onConnection((socket) {
         ref.read(deviceSocketHandlerProvider).register(socket);
+        ref.read(fileSocketHandlerProvider).register(socket);
       });
 
       socketClient.onDisconnect((socket) {

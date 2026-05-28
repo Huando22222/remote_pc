@@ -6,6 +6,8 @@ import 'package:pc_remote/core/config/routes.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
+import 'package:pc_remote/features/file_transfer/presentation/providers/downloaded_files_provider.dart';
+import 'package:pc_remote/features/file_transfer/presentation/widgets/downloaded_files_sheet.dart';
 
 // ─────────────────────────────────────────────
 // Presentation Layer — ConnectionPage
@@ -60,6 +62,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
 
     final isConnected =
         ref.watch(connectionNotifierProvider) == ConnectionStatus.connected;
+    final downloadedFiles = ref.watch(downloadedFilesProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final md = MediaQuery.of(context);
@@ -91,10 +94,14 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
               // ── Connection Card ──
               _ConnectionCard(
                 ipController: _ipController,
-                isConnected: isConnected == ConnectionStatus.connected,
+                isConnected: isConnected,
                 onConnect: _handleConnect,
                 onScanQr: _openQrScanner,
               ),
+
+              const SizedBox(height: 24),
+
+              _DownloadedFilesEntry(count: downloadedFiles.length),
 
               const SizedBox(height: 24),
 
@@ -659,4 +666,64 @@ class _BracketPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+class _DownloadedFilesEntry extends StatelessWidget {
+  const _DownloadedFilesEntry({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => showDownloadedFilesSheet(context),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.45),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.download_done_rounded,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Downloaded files',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    count == 0
+                        ? 'No files downloaded yet'
+                        : '$count file(s) ready to open or share',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurface.withOpacity(0.55),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_up_rounded),
+          ],
+        ),
+      ),
+    );
+  }
 }
