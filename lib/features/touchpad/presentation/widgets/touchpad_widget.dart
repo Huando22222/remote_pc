@@ -15,7 +15,7 @@ import '../../domain/usecases/scroll_usecase.dart';
 import '../../domain/usecases/swipe_usecase.dart';
 
 // ── Ngưỡng ────────────────────────────────────────────────────────────────────
-const _kMoveThreshold = 6.0; // px — dưới đây vẫn là tap/long-press
+const _kMoveThreshold = 1.5; // px
 const _kSwipeThreshold = 55.0; // px — tổng vector ≥ này → swipe
 const _kLongPressMs = 500; // ms — giữ đủ lâu → mouseDown (bôi đen)
 const _kTapMaxMs = 200; // ms — nhả trong thời gian này → tap hợp lệ

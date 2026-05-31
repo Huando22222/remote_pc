@@ -59,10 +59,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.connection,
         builder: (context, state) => const ConnectionScreen(),
       ),
-      GoRoute(
-        path: Routes.touchpad,
-        builder: (context, state) => const TouchpadScreen(),
-      ),
       ShellRoute(
         builder: (context, state, child) {
           return MainShellScreen(child: child);

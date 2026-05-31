@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/core/constants/socket_constants.dart';
@@ -15,10 +16,18 @@ final touchpadSocketDatasourceProvider =
 
 class TouchpadSocketDatasource {
   final SocketClient socketClient;
+  int _mouseMoveLogCount = 0;
 
   TouchpadSocketDatasource(this.socketClient);
 
   Future<void> moveMouse(double dx, double dy) async {
+    _mouseMoveLogCount++;
+    if (_mouseMoveLogCount <= 5 || _mouseMoveLogCount % 30 == 0) {
+      log(
+        'Emit mouse_move #$_mouseMoveLogCount dx: $dx, dy: $dy, connected: ${socketClient.isConnected}',
+        name: 'TouchpadSocketDatasource',
+      );
+    }
     socketClient.emit(SocketConstants.eventMouseMove, {"dx": dx, "dy": dy});
   }
 
