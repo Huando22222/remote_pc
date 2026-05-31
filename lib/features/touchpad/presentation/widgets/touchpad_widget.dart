@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import 'touchpad_state.dart';
@@ -66,12 +67,14 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   // ── mouse hold ────────────────────────────────────────────────────────────
   void _pressDown() {
     if (_mouseIsDown) return;
+    log('mouseDown requested', name: 'TouchpadWidget');
     _mouseIsDown = true;
     widget.mouseDown();
   }
 
   void _releaseUp() {
     if (!_mouseIsDown) return;
+    log('mouseUp requested', name: 'TouchpadWidget');
     _mouseIsDown = false;
     widget.mouseUp();
   }
@@ -99,6 +102,10 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   // POINTER DOWN
   // ─────────────────────────────────────────────────────────────────────────
   void _onDown(PointerDownEvent e) {
+    log(
+      'onPointerDown pointer=${e.pointer}, position=${e.position}',
+      name: 'TouchpadWidget',
+    );
     _s.addPointer(e.pointer, e.position);
 
     switch (_s.fingerCount) {
@@ -145,6 +152,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   }
 
   void _onLongPressTriggered() {
+    log('onLongPressTriggered phase=${_s.phase}', name: 'TouchpadWidget');
     if (_s.phase != TouchpadPhase.tap1) return;
     _s.phase = TouchpadPhase.longPress;
     _pressDown();
@@ -154,6 +162,10 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   // POINTER MOVE
   // ─────────────────────────────────────────────────────────────────────────
   void _onMove(PointerMoveEvent e) {
+    log(
+      'onPointerMove pointer=${e.pointer}, delta=${e.delta}, phase=${_s.phase}',
+      name: 'TouchpadWidget',
+    );
     if (!_s.hasPointer(e.pointer)) return;
     _s.updatePointer(e.pointer, e.position);
 
@@ -167,12 +179,15 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
           _s.cancelLongPress();
           _s.phase = TouchpadPhase.move;
           final s = _smooth(raw);
+          log('moveMouse start dx=${s.dx}, dy=${-s.dy}',
+              name: 'TouchpadWidget');
           widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         }
         break;
 
       case TouchpadPhase.move:
         final s = _smooth(raw);
+        log('moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
         widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         break;
 
@@ -182,12 +197,15 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
         if (_s.moveDistance > _kMoveThreshold) {
           _s.phase = TouchpadPhase.drag;
           final s = _smooth(raw);
+          log('drag moveMouse start dx=${s.dx}, dy=${-s.dy}',
+              name: 'TouchpadWidget');
           widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         }
         break;
 
       case TouchpadPhase.drag:
         final s = _smooth(raw);
+        log('drag moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
         widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         break;
 
@@ -215,6 +233,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   }
 
   void _scroll(Offset d) {
+    log('scroll dx=${-d.dx}, dy=${-d.dy}', name: 'TouchpadWidget');
     widget.scroll(
       ScrollDelta(
         dx: -d.dx * _kScrollSensitivity,
@@ -227,6 +246,8 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   // POINTER UP
   // ─────────────────────────────────────────────────────────────────────────
   void _onUp(PointerUpEvent e) {
+    log('onPointerUp pointer=${e.pointer}, phase=${_s.phase}',
+        name: 'TouchpadWidget');
     _s.removePointer(e.pointer);
     if (_s.fingerCount > 0) return;
 
@@ -253,6 +274,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
           // ── DOUBLE-TAP ──
           // singleTapTimer đã bị cancel ở _onDown case 1 rồi
           _s.resetAll();
+          log('doubleClick requested', name: 'TouchpadWidget');
           widget.doubleClick();
         } else {
           // ── SINGLE TAP: chờ _kSingleTapDelayMs xem có tap 2 không ──
@@ -264,6 +286,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
             () {
               _singleTapTimer = null;
               _s.lastTapUp = null;
+              log('leftClick requested', name: 'TouchpadWidget');
               widget.leftClick();
             },
           );
@@ -289,6 +312,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
 
       case TouchpadPhase.tap2:
         if (heldMs <= _kTapMaxMs && peak == 2) {
+          log('rightClick requested', name: 'TouchpadWidget');
           widget.rightClick();
         }
         _s.resetAll();
@@ -302,6 +326,10 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
         if (_s.totalDelta.distance >= _kSwipeThreshold) {
           widget.swipe(
             SwipeGesture(fingers: peak, direction: _dir(_s.totalDelta)),
+          );
+          log(
+            'swipe requested fingers=$peak, direction=${_dir(_s.totalDelta)}',
+            name: 'TouchpadWidget',
           );
         }
         _s.resetAll();
@@ -317,6 +345,7 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   // POINTER CANCEL
   // ─────────────────────────────────────────────────────────────────────────
   void _onCancel(PointerCancelEvent e) {
+    log('onPointerCancel pointer=${e.pointer}', name: 'TouchpadWidget');
     _s.removePointer(e.pointer);
     if (_s.fingerCount == 0) {
       _releaseUp();
