@@ -65,7 +65,10 @@ class SelectedUploadFilesNotifier extends Notifier<List<SelectableFileEntity>> {
   }
 
   List<File> get checkedFiles {
-    return state.where((item) => item.checked).map((item) => item.file).toList();
+    return state
+        .where((item) => item.checked)
+        .map((item) => item.file)
+        .toList();
   }
 }
 

@@ -16,6 +16,11 @@ class SocketConstants {
   static const String eventMouseScroll = 'mouse_scroll';
   static const String eventSwipe = 'swipe';
 
+  // Keyboard
+  static const String eventKeyboardText = 'keyboard_text';
+  static const String eventKeyboardKey = 'keyboard_key';
+  static const String eventKeyboardShortcut = 'keyboard_shortcut';
+
   // MARK: FILE TRANSFER
   static const String eventFilesAvailable = 'files_available';
   // Timeout

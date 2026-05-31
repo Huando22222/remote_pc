@@ -64,7 +64,8 @@ class FileTransferScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.sm),
                 if (incomingFiles.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                     child: Center(
                       child: Text(
                         'No incoming files',

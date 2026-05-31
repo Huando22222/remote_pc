@@ -121,9 +121,8 @@ class DownloadedFileTile extends ConsumerWidget {
           icon: const Icon(Icons.more_vert_rounded),
           onSelected: (action) async {
             final box = context.findRenderObject() as RenderBox?;
-            final origin = box == null
-                ? null
-                : box.localToGlobal(Offset.zero) & box.size;
+            final origin =
+                box == null ? null : box.localToGlobal(Offset.zero) & box.size;
 
             try {
               switch (action) {

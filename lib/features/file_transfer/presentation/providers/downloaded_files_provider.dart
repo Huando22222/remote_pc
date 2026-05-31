@@ -16,8 +16,8 @@ class DownloadedFilesNotifier extends Notifier<List<File>> {
   @override
   List<File> build() {
     final paths = ref.read(sharedPrefsProvider).getStringList(
-          PrefConstants.downloadedFilePaths,
-        ) ??
+              PrefConstants.downloadedFilePaths,
+            ) ??
         const [];
 
     return paths.map(File.new).where((file) => file.existsSync()).toList();

@@ -50,7 +50,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
 
   @override
   void initState() {
-    _ipController.text = '192.168.2.93';
+    _ipController.text = '192.168.1.114';
     super.initState();
   }
 
@@ -667,6 +667,7 @@ class _BracketPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 class _DownloadedFilesEntry extends StatelessWidget {
   const _DownloadedFilesEntry({required this.count});
 
