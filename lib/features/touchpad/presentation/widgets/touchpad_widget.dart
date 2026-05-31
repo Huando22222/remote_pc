@@ -16,7 +16,7 @@ import '../../domain/usecases/scroll_usecase.dart';
 import '../../domain/usecases/swipe_usecase.dart';
 
 // ── Ngưỡng ────────────────────────────────────────────────────────────────────
-const _kMoveThreshold = 1.5; // px
+const _kMoveThreshold = 6.0; // px
 const _kSwipeThreshold = 55.0; // px — tổng vector ≥ này → swipe
 const _kLongPressMs = 500; // ms — giữ đủ lâu → mouseDown (bôi đen)
 const _kTapMaxMs = 200; // ms — nhả trong thời gian này → tap hợp lệ
@@ -25,7 +25,6 @@ const _kSingleTapDelayMs = 280; // ms — delay trước khi fire leftClick
 //      (= _kDoubleTapMs, để không fire trước double-tap)
 const _kScrollSensitivity = 1.0; // delta Flutter đã đủ lớn
 const _kMoveSmoothAlpha = 0.4; // EMA alpha cho move: nhỏ=mượt, lớn=nhanh hơn
-const _kMoveSensitivity = 3.0;
 // ─────────────────────────────────────────────────────────────────────────────
 
 class TouchpadWidget extends StatefulWidget {
@@ -89,13 +88,6 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
       _kMoveSmoothAlpha * raw.dy + (1 - _kMoveSmoothAlpha) * _smoothDelta.dy,
     );
     return _smoothDelta;
-  }
-
-  MouseMove _mouseMoveFromDelta(Offset delta) {
-    return MouseMove(
-      dx: delta.dx * _kMoveSensitivity,
-      dy: -delta.dy * _kMoveSensitivity,
-    );
   }
 
   void _resetSmooth() => _smoothDelta = Offset.zero;
@@ -187,20 +179,16 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
           _s.cancelLongPress();
           _s.phase = TouchpadPhase.move;
           final s = _smooth(raw);
-          final move = _mouseMoveFromDelta(s);
-          log(
-            'moveMouse start dx=${move.dx}, dy=${move.dy}',
-            name: 'TouchpadWidget',
-          );
-          widget.moveMouse(move);
+          log('moveMouse start dx=${s.dx}, dy=${-s.dy}',
+              name: 'TouchpadWidget');
+          widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         }
         break;
 
       case TouchpadPhase.move:
         final s = _smooth(raw);
-        final move = _mouseMoveFromDelta(s);
-        log('moveMouse dx=${move.dx}, dy=${move.dy}', name: 'TouchpadWidget');
-        widget.moveMouse(move);
+        log('moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
+        widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         break;
 
       case TouchpadPhase.longPress:
@@ -209,23 +197,16 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
         if (_s.moveDistance > _kMoveThreshold) {
           _s.phase = TouchpadPhase.drag;
           final s = _smooth(raw);
-          final move = _mouseMoveFromDelta(s);
-          log(
-            'drag moveMouse start dx=${move.dx}, dy=${move.dy}',
-            name: 'TouchpadWidget',
-          );
-          widget.moveMouse(move);
+          log('drag moveMouse start dx=${s.dx}, dy=${-s.dy}',
+              name: 'TouchpadWidget');
+          widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         }
         break;
 
       case TouchpadPhase.drag:
         final s = _smooth(raw);
-        final move = _mouseMoveFromDelta(s);
-        log(
-          'drag moveMouse dx=${move.dx}, dy=${move.dy}',
-          name: 'TouchpadWidget',
-        );
-        widget.moveMouse(move);
+        log('drag moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
+        widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
         break;
 
       case TouchpadPhase.tap2:
