@@ -10,6 +10,7 @@ import 'package:pc_remote/features/connection/presentation/providers/connection_
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/features/file_transfer/presentation/providers/downloaded_files_provider.dart';
 import 'package:pc_remote/features/file_transfer/presentation/widgets/downloaded_files_sheet.dart';
+import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   const ConnectionScreen({super.key});
@@ -20,6 +21,13 @@ class ConnectionScreen extends ConsumerStatefulWidget {
 
 class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   final _ipController = TextEditingController();
+  bool _autoConnectAttempted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_tryAutoConnect);
+  }
 
   @override
   void dispose() {
@@ -41,6 +49,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
     try {
       await ref.read(connectionNotifierProvider.notifier).connect(ip);
+      await ref.read(appSettingsProvider.notifier).setLastConnectedIp(ip);
     } catch (_) {
       if (!mounted) return;
       InAppNotificationHelper.error(
@@ -50,6 +59,18 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             'Cannot connect to PC. Check that both devices are on the same Wi-Fi and the server is running.',
       );
     }
+  }
+
+  Future<void> _tryAutoConnect() async {
+    if (_autoConnectAttempted || !mounted) return;
+    _autoConnectAttempted = true;
+
+    final settings = ref.read(appSettingsProvider);
+    final ip = settings.lastConnectedIp;
+    if (!settings.autoConnect || ip == null || !_isIpv4(ip)) return;
+
+    _ipController.text = ip;
+    await _handleConnect();
   }
 
   void _openQrScanner() {
@@ -87,6 +108,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
     final status = ref.watch(connectionNotifierProvider);
     final downloadedFiles = ref.watch(downloadedFilesProvider);
+    final settings = ref.watch(appSettingsProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;
 
@@ -107,8 +129,11 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               _ConnectionCard(
                 ipController: _ipController,
                 status: status,
+                autoConnect: settings.autoConnect,
                 onConnect: _handleConnect,
                 onScanQr: _openQrScanner,
+                onAutoConnectChanged:
+                    ref.read(appSettingsProvider.notifier).setAutoConnect,
               ),
               const SizedBox(height: 20),
               _DownloadedFilesEntry(count: downloadedFiles.length),
@@ -208,24 +233,10 @@ class _FeatureGrid extends StatelessWidget {
           ],
         ),
         SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: _FeatureCard(
-                icon: Icons.folder_zip_rounded,
-                label: 'Files',
-                description: 'Send and receive',
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: _FeatureCard(
-                icon: Icons.content_paste_rounded,
-                label: 'Clipboard',
-                description: 'Sync text',
-              ),
-            ),
-          ],
+        _FeatureCard(
+          icon: Icons.folder_zip_rounded,
+          label: 'Files',
+          description: 'Send and receive',
         ),
       ],
     );
@@ -289,14 +300,18 @@ class _ConnectionCard extends StatelessWidget {
   const _ConnectionCard({
     required this.ipController,
     required this.status,
+    required this.autoConnect,
     required this.onConnect,
     required this.onScanQr,
+    required this.onAutoConnectChanged,
   });
 
   final TextEditingController ipController;
   final ConnectionStatus status;
+  final bool autoConnect;
   final VoidCallback onConnect;
   final VoidCallback onScanQr;
+  final ValueChanged<bool> onAutoConnectChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -347,6 +362,15 @@ class _ConnectionCard extends StatelessWidget {
                 onPressed: onScanQr,
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          CheckboxListTile(
+            value: autoConnect,
+            onChanged: (value) => onAutoConnectChanged(value ?? true),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            title: const Text('Auto connect'),
+            subtitle: const Text('Reconnect to this PC next time'),
           ),
           const SizedBox(height: 12),
           FilledButton.icon(
