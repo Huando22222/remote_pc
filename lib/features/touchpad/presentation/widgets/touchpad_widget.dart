@@ -36,6 +36,7 @@ class TouchpadWidget extends StatefulWidget {
   final MouseUpUseCase mouseUp;
   final ScrollUseCase scroll;
   final SwipeUseCase swipe;
+  final double mouseSensitivity;
 
   const TouchpadWidget({
     super.key,
@@ -47,6 +48,7 @@ class TouchpadWidget extends StatefulWidget {
     required this.mouseUp,
     required this.scroll,
     required this.swipe,
+    required this.mouseSensitivity,
   });
 
   @override
@@ -179,16 +181,24 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
           _s.cancelLongPress();
           _s.phase = TouchpadPhase.move;
           final s = _smooth(raw);
-          log('moveMouse start dx=${s.dx}, dy=${-s.dy}',
+          final move = MouseMove(
+            dx: s.dx * widget.mouseSensitivity,
+            dy: -s.dy * widget.mouseSensitivity,
+          );
+          log('moveMouse start dx=${move.dx}, dy=${move.dy}',
               name: 'TouchpadWidget');
-          widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
+          widget.moveMouse(move);
         }
         break;
 
       case TouchpadPhase.move:
         final s = _smooth(raw);
-        log('moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
-        widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
+        final move = MouseMove(
+          dx: s.dx * widget.mouseSensitivity,
+          dy: -s.dy * widget.mouseSensitivity,
+        );
+        log('moveMouse dx=${move.dx}, dy=${move.dy}', name: 'TouchpadWidget');
+        widget.moveMouse(move);
         break;
 
       case TouchpadPhase.longPress:
@@ -197,16 +207,25 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
         if (_s.moveDistance > _kMoveThreshold) {
           _s.phase = TouchpadPhase.drag;
           final s = _smooth(raw);
-          log('drag moveMouse start dx=${s.dx}, dy=${-s.dy}',
+          final move = MouseMove(
+            dx: s.dx * widget.mouseSensitivity,
+            dy: -s.dy * widget.mouseSensitivity,
+          );
+          log('drag moveMouse start dx=${move.dx}, dy=${move.dy}',
               name: 'TouchpadWidget');
-          widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
+          widget.moveMouse(move);
         }
         break;
 
       case TouchpadPhase.drag:
         final s = _smooth(raw);
-        log('drag moveMouse dx=${s.dx}, dy=${-s.dy}', name: 'TouchpadWidget');
-        widget.moveMouse(MouseMove(dx: s.dx, dy: -s.dy));
+        final move = MouseMove(
+          dx: s.dx * widget.mouseSensitivity,
+          dy: -s.dy * widget.mouseSensitivity,
+        );
+        log('drag moveMouse dx=${move.dx}, dy=${move.dy}',
+            name: 'TouchpadWidget');
+        widget.moveMouse(move);
         break;
 
       case TouchpadPhase.tap2:

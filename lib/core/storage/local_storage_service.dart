@@ -16,8 +16,14 @@ class LocalStorageService {
 
   String? getString(String key) => _prefs.getString(key);
 
+  double? getDouble(String key) => _prefs.getDouble(key);
+
   Future<void> setString(String key, String value) {
     return _prefs.setString(key, value);
+  }
+
+  Future<void> setDouble(String key, double value) {
+    return _prefs.setDouble(key, value);
   }
 
   Future<void> remove(String key) {

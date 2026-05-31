@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
 import 'package:pc_remote/features/touchpad/domain/usecases/swipe_usecase.dart';
 import 'package:pc_remote/features/touchpad/presentation/widgets/touchpad_widget.dart';
 import '../../domain/usecases/move_mouse_usecase.dart';
@@ -20,6 +21,8 @@ class TouchpadScreen extends ConsumerStatefulWidget {
 class _TouchpadScreenState extends ConsumerState<TouchpadScreen> {
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(appSettingsProvider);
+
     return TouchpadWidget(
       moveMouse: ref.read(moveMouseUseCaseProvider),
       leftClick: ref.read(leftClickUseCaseProvider),
@@ -29,6 +32,7 @@ class _TouchpadScreenState extends ConsumerState<TouchpadScreen> {
       mouseUp: ref.read(mouseUpUseCaseProvider),
       scroll: ref.read(scrollUseCaseProvider),
       swipe: ref.read(swipeUseCaseProvider),
+      mouseSensitivity: settings.mouseSensitivity,
     );
   }
 }

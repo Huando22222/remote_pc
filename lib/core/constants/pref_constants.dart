@@ -4,4 +4,5 @@ class PrefConstants {
   static const appLocale = 'app_locale';
   static const themeMode = 'theme_mode';
   static const downloadedFilePaths = 'downloaded_file_paths';
+  static const mouseSensitivity = 'mouse_sensitivity';
 }

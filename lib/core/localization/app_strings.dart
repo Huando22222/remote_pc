@@ -1,80 +1,23 @@
 abstract class AppStrings {
-  // MARK: APP
   String get appName;
-  String get appTagline;
-  // MARK: AUTH
-  String get login;
-  String get logout;
-  String get register;
-  String get username;
-  String get password;
-  String get forgotPassword;
-  String get noAccountMessage;
-  String get loginInstruction;
-  String get loginFailed;
-  String get changePassword;
-  String get editProfile;
-  String get loginToContinue;
-  String get guestSubtitle;
-
-  String get loginRequiredTitle;
-  String loginRequiredSubtitle(String? featureName);
-  String get loginNow;
-  String get createAccount;
-  String get skipContinue;
-  String get benefitBooking;
-  String get benefitHealthRecord;
-  String get benefitMore;
-  // MARK: COMMON
+  String get touchpad;
+  String get keyboard;
+  String get fileTransfer;
+  String get clipboard;
+  String get mediaControl;
+  String get disconnect;
+  String get settings;
   String get save;
   String get cancel;
-  String get loading;
-  String get error;
-  String get changeLanguage;
-  String get all;
-  String get viewAll;
-  String get setting;
-  String get account;
-  String get notification;
-  String get security;
-  String get preferences;
-  String get darkMode;
   String get language;
-  String get languageName;
-  String get support;
-  String get contactSupport;
-  String get privacyPolicy;
-  String get termOfUse;
-  // MARK: SHELL
-  String get home;
-  String get document;
-  String get health;
-  String get profile;
-
-  // MARK: DASHBOARD
-  String get features;
-  String get doctors;
-  String get packages;
-  String get testServices;
-  String get medicalTopics;
-  String get explore;
-
-  String get specialty;
-  String get consultation;
-  String get labTest;
-  String get medication;
-  String get emergency;
-  String get lookup;
-
-  // MARK: BOOKING
-  String get booking;
-  String get package;
-  String get service;
-  String get serviceBooking;
-  String get packageBooking;
-  String get specialtyBooking;
-
-  // MARK: DYNAMIC
-  String welcome(String name);
-  String required(String field);
+  String get english;
+  String get vietnamese;
+  String get mouseSensitivity;
+  String get mouseSensitivityDescription;
+  String get reset;
+  String get connection;
+  String get connectedDevice;
+  String get disconnected;
+  String disconnectedMessage(int count);
+  String get noClientConnected;
 }

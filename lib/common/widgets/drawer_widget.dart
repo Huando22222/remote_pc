@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pc_remote/core/config/routes.dart';
+import 'package:pc_remote/core/localization/locale_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
 import 'package:pc_remote/features/device/domain/entities/device_entity.dart';
 import 'package:pc_remote/features/device/presentation/providers/device_provider.dart';
@@ -22,6 +23,7 @@ class DrawerWidget extends ConsumerWidget {
     final currentRoute = GoRouterState.of(context).matchedLocation;
     final svDv = ref.watch(deviceProvider);
     final rmtDv = ref.watch(remoteDeviceProvider);
+    final strings = ref.watch(stringsProvider);
 
     return Drawer(
       backgroundColor: cs.surface,
@@ -58,7 +60,7 @@ class DrawerWidget extends ConsumerWidget {
                         context.go(Routes.touchpad);
                       },
                       icon: FontAwesomeIcons.handPointer,
-                      label: 'Touchpad',
+                      label: strings.touchpad,
                       isActive: currentRoute == Routes.touchpad,
                     ),
                     _DrawerItem(
@@ -67,7 +69,7 @@ class DrawerWidget extends ConsumerWidget {
                         context.go(Routes.keyboard);
                       },
                       icon: FontAwesomeIcons.keyboard,
-                      label: 'Keyboard',
+                      label: strings.keyboard,
                       isActive: currentRoute == Routes.keyboard,
                     ),
                     _DrawerItem(
@@ -76,7 +78,7 @@ class DrawerWidget extends ConsumerWidget {
                         context.go(Routes.fileTransfer);
                       },
                       icon: FontAwesomeIcons.fileArrowUp,
-                      label: 'Send file',
+                      label: strings.fileTransfer,
                       isActive: currentRoute == Routes.fileTransfer,
                     ),
                     _DrawerItem(
@@ -85,13 +87,17 @@ class DrawerWidget extends ConsumerWidget {
                         context.go(Routes.clipboard);
                       },
                       icon: FontAwesomeIcons.clipboard,
-                      label: 'Clipboard',
+                      label: strings.clipboard,
                       isActive: currentRoute == Routes.clipboard,
                     ),
                     _DrawerItem(
-                      onTap: () {},
-                      icon: FontAwesomeIcons.volumeHigh,
-                      label: 'Media control',
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(Routes.settings);
+                      },
+                      icon: FontAwesomeIcons.gear,
+                      label: strings.settings,
+                      isActive: currentRoute == Routes.settings,
                     ),
                   ],
                 ),
@@ -104,7 +110,7 @@ class DrawerWidget extends ConsumerWidget {
                   cn.disconnect();
                 },
                 icon: FontAwesomeIcons.linkSlash,
-                label: 'Disconnect',
+                label: strings.disconnect,
                 isDanger: true,
               ),
             ),

@@ -7,6 +7,7 @@ import 'package:pc_remote/features/connection/presentation/providers/connection_
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/features/file_transfer/presentation/screens/file_transfer_screen.dart';
 import 'package:pc_remote/features/keyboard/presentation/screens/keyboard_screen.dart';
+import 'package:pc_remote/features/settings/presentation/screens/settings_screen.dart';
 import 'package:pc_remote/features/touchpad/presentation/screens/touchpad_screen.dart';
 
 import '../core/config/routes.dart';
@@ -79,6 +80,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Routes.clipboard,
             builder: (context, state) => const ClipboardScreen(),
+          ),
+          GoRoute(
+            path: Routes.settings,
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),
