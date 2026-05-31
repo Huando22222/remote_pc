@@ -2,10 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/core/constants/api_constants.dart';
-import 'package:pc_remote/socket/handlers/device_socket_handler.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-
-import '../../core/constants/socket_constants.dart';
 
 final socketClientProvider = Provider((ref) {
   final client = SocketClient();
@@ -30,9 +27,12 @@ class SocketClient {
     yield* _connectionController.stream;
   }
 
-  void connect(String ip) {
+  Future<void> connect(String ip) async {
     if (_socket?.connected == true) return;
 
+    final completer = Completer<void>();
+
+    _socket?.dispose();
     _socket = io.io(
       'ws://$ip:${ApiConstants.socketPort}',
       io.OptionBuilder()
@@ -43,6 +43,7 @@ class SocketClient {
     );
 
     _socket!.onConnect((_) {
+      if (!completer.isCompleted) completer.complete();
       _connectionController.add(true);
 
       final socket = _socket;
@@ -52,6 +53,9 @@ class SocketClient {
     });
 
     _socket!.onDisconnect((_) {
+      if (!completer.isCompleted) {
+        completer.completeError(Exception('Unable to connect to PC'));
+      }
       _connectionController.add(false);
 
       final socket = _socket;
@@ -60,7 +64,27 @@ class SocketClient {
       }
     });
 
+    _socket!.onConnectError((error) {
+      if (!completer.isCompleted) {
+        completer.completeError(Exception(error.toString()));
+      }
+    });
+
+    _socket!.onError((error) {
+      if (!completer.isCompleted) {
+        completer.completeError(Exception(error.toString()));
+      }
+    });
+
     _socket!.connect();
+
+    return completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        _socket?.disconnect();
+        throw TimeoutException('Connection timeout');
+      },
+    );
   }
 
   void onConnection(

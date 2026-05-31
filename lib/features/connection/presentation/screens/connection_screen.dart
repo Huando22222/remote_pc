@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pc_remote/core/config/routes.dart';
+import 'package:pc_remote/core/helpers/in_app_notification_helper.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/features/file_transfer/presentation/providers/downloaded_files_provider.dart';
 import 'package:pc_remote/features/file_transfer/presentation/widgets/downloaded_files_sheet.dart';
 
-// ─────────────────────────────────────────────
-// Presentation Layer — ConnectionPage
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Presentation Layer â€” ConnectionPage
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   const ConnectionScreen({super.key});
@@ -31,8 +33,39 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
 
   Future<void> _handleConnect() async {
     final ip = _ipController.text.trim();
-    if (ip.isEmpty) return;
-    await ref.read(connectionNotifierProvider.notifier).connect(ip);
+
+    if (!_isIpv4(ip)) {
+      InAppNotificationHelper.warning(
+        context,
+        title: 'Invalid IP',
+        message: 'Enter a valid PC IP, for example 192.168.1.10.',
+      );
+      return;
+    }
+
+    try {
+      await ref.read(connectionNotifierProvider.notifier).connect(ip);
+    } catch (_) {
+      if (!mounted) return;
+      InAppNotificationHelper.error(
+        context,
+        title: 'Connection failed',
+        message:
+            'Cannot connect to PC. Check that both devices are on the same Wi-Fi and the server is running.',
+      );
+    }
+  }
+
+  bool _isIpv4(String value) {
+    final parts = value.split('.');
+    if (parts.length != 4) return false;
+
+    for (final part in parts) {
+      final number = int.tryParse(part);
+      if (number == null || number < 0 || number > 255) return false;
+    }
+
+    return true;
   }
 
   void _openQrScanner() {
@@ -50,7 +83,6 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
 
   @override
   void initState() {
-    _ipController.text = '192.168.1.114';
     super.initState();
   }
 
@@ -60,8 +92,9 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
       if (next == ConnectionStatus.connected) context.go(Routes.touchpad);
     });
 
-    final isConnected =
-        ref.watch(connectionNotifierProvider) == ConnectionStatus.connected;
+    final connectionStatus = ref.watch(connectionNotifierProvider);
+    final isConnected = connectionStatus == ConnectionStatus.connected;
+    final isConnecting = connectionStatus == ConnectionStatus.connecting;
     final downloadedFiles = ref.watch(downloadedFilesProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -81,20 +114,21 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Header ──
+              // â”€â”€ Header â”€â”€
               _AppHeader(),
 
               const SizedBox(height: 32),
 
-              // ── Feature Cards ──
+              // â”€â”€ Feature Cards â”€â”€
               _FeatureGrid(),
 
               const SizedBox(height: 32),
 
-              // ── Connection Card ──
+              // â”€â”€ Connection Card â”€â”€
               _ConnectionCard(
                 ipController: _ipController,
                 isConnected: isConnected,
+                isConnecting: isConnecting,
                 onConnect: _handleConnect,
                 onScanQr: _openQrScanner,
               ),
@@ -105,10 +139,10 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
 
               const SizedBox(height: 24),
 
-              // ── Help hint ──
+              // â”€â”€ Help hint â”€â”€
               Center(
                 child: Text(
-                  'Đảm bảo điện thoại và máy tính\ncùng kết nối một mạng Wi-Fi',
+                  'Äáº£m báº£o Ä‘iá»‡n thoáº¡i vÃ  mÃ¡y tÃ­nh\ncÃ¹ng káº¿t ná»‘i má»™t máº¡ng Wi-Fi',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -125,9 +159,9 @@ class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
   }
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Header
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _AppHeader extends StatelessWidget {
   @override
@@ -167,7 +201,7 @@ class _AppHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                'Điều khiển máy tính từ điện thoại của bạn',
+                'Äiá»u khiá»ƒn mÃ¡y tÃ­nh tá»« Ä‘iá»‡n thoáº¡i cá»§a báº¡n',
                 style: TextStyle(
                   fontSize: 14,
                   color: colorScheme.onSurface.withOpacity(0.55),
@@ -182,9 +216,9 @@ class _AppHeader extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Feature Grid
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _FeatureGrid extends StatelessWidget {
   @override
@@ -210,7 +244,7 @@ class _FeatureGrid extends StatelessWidget {
                   item: _FeatureItem(
                     icon: Icons.touch_app_rounded,
                     label: 'Touchpad',
-                    desc: 'Chạm & kéo như chuột thật',
+                    desc: 'Cháº¡m & kÃ©o nhÆ° chuá»™t tháº­t',
                   ),
                 ),
               ),
@@ -218,8 +252,8 @@ class _FeatureGrid extends StatelessWidget {
                 child: _FeatureCard(
                   item: _FeatureItem(
                     icon: Icons.keyboard_rounded,
-                    label: 'Bàn phím',
-                    desc: 'Gõ văn bản từ xa',
+                    label: 'BÃ n phÃ­m',
+                    desc: 'GÃµ vÄƒn báº£n tá»« xa',
                   ),
                 ),
               ),
@@ -234,8 +268,8 @@ class _FeatureGrid extends StatelessWidget {
                 child: _FeatureCard(
                   item: _FeatureItem(
                     icon: Icons.folder_zip_rounded,
-                    label: 'Chuyển file',
-                    desc: 'Gửi file từ điện thoại sang PC',
+                    label: 'Chuyá»ƒn file',
+                    desc: 'Gá»­i file tá»« Ä‘iá»‡n thoáº¡i sang PC',
                   ),
                 ),
               ),
@@ -244,7 +278,7 @@ class _FeatureGrid extends StatelessWidget {
                   item: _FeatureItem(
                     icon: Icons.content_paste_rounded,
                     label: 'Clipboard',
-                    desc: 'Sao chép văn bản từ ĐT sang PC',
+                    desc: 'Sao chÃ©p vÄƒn báº£n tá»« ÄT sang PC',
                   ),
                 ),
               ),
@@ -253,7 +287,7 @@ class _FeatureGrid extends StatelessWidget {
               //     item: _FeatureItem(
               //       icon: Icons.wifi_rounded,
               //       label: 'Wi-Fi LAN',
-              //       desc: 'Kết nối nội bộ, siêu nhanh',
+              //       desc: 'Káº¿t ná»‘i ná»™i bá»™, siÃªu nhanh',
               //     ),
               //   ),
               // ),
@@ -326,20 +360,22 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Connection Card
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _ConnectionCard extends StatelessWidget {
   const _ConnectionCard({
     required this.ipController,
     required this.isConnected,
+    required this.isConnecting,
     required this.onConnect,
     required this.onScanQr,
   });
 
   final TextEditingController ipController;
   final bool isConnected;
+  final bool isConnecting;
   final VoidCallback onConnect;
   final VoidCallback onScanQr;
 
@@ -365,7 +401,7 @@ class _ConnectionCard extends StatelessWidget {
               Icon(Icons.lan_rounded, size: 18, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                'Kết nối tới máy tính',
+                'Connect to PC',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -380,17 +416,20 @@ class _ConnectionCard extends StatelessWidget {
           // IP Input
           TextField(
             controller: ipController,
-            keyboardType: TextInputType.number,
+            keyboardType: TextInputType.url,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+            ],
             decoration: InputDecoration(
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
-              labelText: 'Địa chỉ IP',
+              labelText: 'PC IP address',
               hintText: '192.168.x.x',
               prefixIcon: const Icon(Icons.computer_rounded),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.qr_code_scanner_rounded),
-                tooltip: 'Quét mã QR',
+                tooltip: 'Scan QR',
                 onPressed: onScanQr,
               ),
             ),
@@ -400,7 +439,7 @@ class _ConnectionCard extends StatelessWidget {
 
           // Connect Button
           FilledButton.icon(
-            onPressed: isConnected ? null : onConnect,
+            onPressed: isConnected || isConnecting ? null : onConnect,
             style: FilledButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
               shape: RoundedRectangleBorder(
@@ -408,10 +447,18 @@ class _ConnectionCard extends StatelessWidget {
               ),
             ),
             icon: Icon(
-              isConnected ? Icons.check_circle_rounded : Icons.link_rounded,
+              isConnected
+                  ? Icons.check_circle_rounded
+                  : isConnecting
+                      ? Icons.sync_rounded
+                      : Icons.link_rounded,
             ),
             label: Text(
-              isConnected ? 'Đã kết nối' : 'Kết nối',
+              isConnected
+                  ? 'Connected'
+                  : isConnecting
+                      ? 'Connecting'
+                      : 'Connect',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -428,7 +475,7 @@ class _ConnectionCard extends StatelessWidget {
           //     Padding(
           //       padding: const EdgeInsets.symmetric(horizontal: 12),
           //       child: Text(
-          //         'hoặc',
+          //         'hoáº·c',
           //         style: TextStyle(
           //           fontSize: 12,
           //           color: colorScheme.onSurface.withOpacity(0.4),
@@ -452,7 +499,7 @@ class _ConnectionCard extends StatelessWidget {
           //   ),
           //   icon: const Icon(Icons.qr_code_scanner_rounded),
           //   label: const Text(
-          //     'Quét mã QR',
+          //     'QuÃ©t mÃ£ QR',
           //     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
           //   ),
           // ),
@@ -485,30 +532,66 @@ class _QrScannerPageState extends State<QrScannerPage> {
 
   void _onDetect(BarcodeCapture capture) {
     if (_handled) return;
-    final value = capture.barcodes.firstOrNull?.rawValue;
-    if (value == null || value.isEmpty) return;
+
+    final rawValue = capture.barcodes
+        .map((barcode) => barcode.rawValue)
+        .whereType<String>()
+        .firstWhere(
+          (value) => value.trim().isNotEmpty,
+          orElse: () => '',
+        );
+    final ip = _extractIp(rawValue);
+    if (ip == null) return;
 
     _handled = true;
     _scannerController.stop();
 
     Navigator.of(context).pop();
-    widget.onScanned(value);
+    widget.onScanned(ip);
+  }
+
+  String? _extractIp(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri != null && uri.host.isNotEmpty && _isIpv4(uri.host)) {
+      return uri.host;
+    }
+
+    final match = RegExp(r'\b(?:\d{1,3}\.){3}\d{1,3}\b').firstMatch(trimmed);
+    final ip = match?.group(0);
+    if (ip == null || !_isIpv4(ip)) return null;
+
+    return ip;
+  }
+
+  bool _isIpv4(String value) {
+    final parts = value.split('.');
+    if (parts.length != 4) return false;
+
+    for (final part in parts) {
+      final number = int.tryParse(part);
+      if (number == null || number < 0 || number > 255) return false;
+    }
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quét mã QR'),
+        title: const Text('Scan QR'),
         actions: [
           IconButton(
             icon: const Icon(Icons.flashlight_on_rounded),
-            tooltip: 'Bật/tắt đèn flash',
+            tooltip: 'Toggle flash',
             onPressed: _scannerController.toggleTorch,
           ),
           IconButton(
             icon: const Icon(Icons.cameraswitch_rounded),
-            tooltip: 'Đổi camera',
+            tooltip: 'Switch camera',
             onPressed: _scannerController.switchCamera,
           ),
         ],
@@ -526,9 +609,9 @@ class _QrScannerPageState extends State<QrScannerPage> {
   }
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Scanner Overlay
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _ScannerOverlay extends StatelessWidget {
   @override
@@ -580,7 +663,7 @@ class _ScannerOverlay extends StatelessWidget {
               right: 0,
               top: top + cutoutSize + 24,
               child: const Text(
-                'Hướng camera vào mã QR trên màn hình máy tính',
+                'Point the camera at the QR code on your PC',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,

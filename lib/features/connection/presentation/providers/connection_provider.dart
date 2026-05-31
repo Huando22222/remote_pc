@@ -59,6 +59,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
       await ref.read(connectUseCaseProvider)(ip);
     } catch (_) {
       state = ConnectionStatus.disconnected;
+      rethrow;
     }
   }
 
