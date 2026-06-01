@@ -46,10 +46,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isConnected = notifier.isConnected;
       final onConnectionPage = state.matchedLocation == Routes.connection;
 
-      // Mất kết nối → về màn hình connection
-      if (!isConnected && !onConnectionPage) return Routes.connection;
-
-      // Đã kết nối mà đang ở connection page → vào remote
+      // Connected on connection page -> enter the main remote surface.
       if (isConnected && onConnectionPage) return Routes.touchpad;
 
       return null;
@@ -90,3 +87,4 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
