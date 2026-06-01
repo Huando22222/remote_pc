@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/features/device/presentation/providers/remote_device_provider.dart';
 import 'package:pc_remote/features/file_transfer/data/datasources/file_upload_datasource.dart';
 import 'package:pc_remote/features/file_transfer/domain/entities/selectable_file_entity.dart';
+import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
 
 final selectedUploadFilesProvider =
     NotifierProvider<SelectedUploadFilesNotifier, List<SelectableFileEntity>>(
@@ -85,7 +86,8 @@ class UploadingFilesNotifier extends Notifier<bool> {
       throw StateError('No PC connected');
     }
 
-    final serverIp = remoteDevices.first.localIp;
+    final serverIp = ref.read(appSettingsProvider).lastConnectedIp ??
+        remoteDevices.first.localIp;
     log(
       '[UploadingFilesNotifier] target serverIp=$serverIp '
       'remoteDevice=${remoteDevices.first.deviceName}',

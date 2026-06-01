@@ -44,6 +44,6 @@ class DeviceSocketHandler {
   }
 
   void dispose(io.Socket socket) {
-    socket.off(SocketConstants.eventServerDeviceInfo);
+    socket.off(SocketConstants.eventRefreshDeviceInfo);
   }
 }

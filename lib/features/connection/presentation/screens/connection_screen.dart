@@ -48,9 +48,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     }
 
     try {
-      await ref.read(connectionNotifierProvider.notifier).connect(ip);
       await ref.read(appSettingsProvider.notifier).setLastConnectedIp(ip);
       await ref.read(connectionHistoryProvider.notifier).upsertIp(ip);
+      await ref.read(connectionNotifierProvider.notifier).connect(ip);
       final remoteDevices = ref.read(remoteDeviceProvider);
       if (remoteDevices.isNotEmpty) {
         await ref.read(connectionHistoryProvider.notifier).updateDeviceInfo(

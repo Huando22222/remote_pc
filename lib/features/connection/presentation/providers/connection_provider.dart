@@ -4,6 +4,7 @@ import 'package:pc_remote/features/connection/presentation/providers/connection_
 import 'package:pc_remote/socket/client/socket_client.dart';
 import 'package:pc_remote/socket/handlers/device_socket_handler.dart';
 import 'package:pc_remote/socket/handlers/file_socket_handler.dart';
+import 'package:pc_remote/features/device/presentation/providers/remote_device_provider.dart';
 
 import '../../domain/usecases/connect_usecase.dart';
 import '../../domain/usecases/disconnect_usecase.dart';
@@ -39,6 +40,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
     if (state == ConnectionStatus.connecting) return;
 
     final socketClient = ref.read(socketClientProvider);
+    ref.read(remoteDeviceProvider.notifier).clear();
 
     if (!_handlerRegistered) {
       _handlerRegistered = true;
@@ -50,6 +52,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
 
       socketClient.onDisconnect((socket) {
         ref.read(deviceSocketHandlerProvider).dispose(socket);
+        ref.read(remoteDeviceProvider.notifier).clear();
       });
     }
 
@@ -65,6 +68,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
 
   Future<void> disconnect() async {
     await ref.read(disconnectUseCaseProvider)();
+    ref.read(remoteDeviceProvider.notifier).clear();
 
     state = ConnectionStatus.disconnected;
   }

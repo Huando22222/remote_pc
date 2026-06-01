@@ -77,12 +77,13 @@ class ConnectionHistoryNotifier extends Notifier<List<ConnectionHistoryEntry>> {
     if (ip.isEmpty) return;
 
     final now = DateTime.now();
-    final fallbackName = device?.deviceName ?? 'PC $ip';
+    final existing = state.where((item) => item.ip == ip).firstOrNull;
+    final fallbackName = device?.deviceName ?? existing?.deviceName ?? 'PC $ip';
     final nextEntry = ConnectionHistoryEntry(
       ip: ip,
       deviceName: fallbackName,
-      platform: device?.platform ?? '',
-      osVersion: device?.osVersion ?? '',
+      platform: device?.platform ?? existing?.platform ?? '',
+      osVersion: device?.osVersion ?? existing?.osVersion ?? '',
       lastSeen: now,
     );
 

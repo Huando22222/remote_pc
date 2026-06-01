@@ -42,7 +42,7 @@ class DrawerWidget extends ConsumerWidget {
                 }
 
                 return _Header(
-                  serverDevice: svDv,
+                  localDevice: svDv,
                   remoteDevice: rmtDv.first,
                 );
               },
@@ -131,10 +131,10 @@ class DrawerWidget extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  final DeviceEntity serverDevice;
+  final DeviceEntity localDevice;
   final DeviceEntity remoteDevice;
   const _Header({
-    required this.serverDevice,
+    required this.localDevice,
     required this.remoteDevice,
   });
 
@@ -191,7 +191,7 @@ class _Header extends StatelessWidget {
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        serverDevice.deviceName,
+                        localDevice.deviceName,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
