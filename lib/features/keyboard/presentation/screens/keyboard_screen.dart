@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -55,28 +56,33 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
   }
 
   _TextDiff _textDiff(String previous, String current) {
+    final previousChars = previous.characters.toList(growable: false);
+    final currentChars = current.characters.toList(growable: false);
+
     var prefixLength = 0;
-    final minLength =
-        previous.length < current.length ? previous.length : current.length;
+    final minLength = previousChars.length < currentChars.length
+        ? previousChars.length
+        : currentChars.length;
 
     while (prefixLength < minLength &&
-        previous.codeUnitAt(prefixLength) == current.codeUnitAt(prefixLength)) {
+        previousChars[prefixLength] == currentChars[prefixLength]) {
       prefixLength++;
     }
 
-    var previousSuffix = previous.length;
-    var currentSuffix = current.length;
+    var previousSuffix = previousChars.length;
+    var currentSuffix = currentChars.length;
     while (previousSuffix > prefixLength &&
         currentSuffix > prefixLength &&
-        previous.codeUnitAt(previousSuffix - 1) ==
-            current.codeUnitAt(currentSuffix - 1)) {
+        previousChars[previousSuffix - 1] == currentChars[currentSuffix - 1]) {
       previousSuffix--;
       currentSuffix--;
     }
 
-    final removedText = previous.substring(prefixLength, previousSuffix);
-    final deleteCount = removedText.runes.length;
-    final inserted = current.substring(prefixLength, currentSuffix);
+    final deleteCount = previousSuffix - prefixLength;
+    final inserted = currentChars
+        .skip(prefixLength)
+        .take(currentSuffix - prefixLength)
+        .join();
 
     return _TextDiff(deleteCount: deleteCount, inserted: inserted);
   }
