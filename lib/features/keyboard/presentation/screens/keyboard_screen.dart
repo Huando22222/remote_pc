@@ -35,24 +35,25 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
         return;
       }
 
+      if (_isComposingText) return;
+
       final previous = _lastRealtimeText;
       _lastRealtimeText = value;
 
       if (value == previous) return;
 
       final diff = _textDiff(previous, value);
-      final sendKey = ref.read(sendKeyboardKeyUseCaseProvider);
-
-      for (var i = 0; i < diff.deleteCount; i++) {
-        await sendKey('backspace');
-      }
-
       if (diff.inserted.isNotEmpty) {
         await ref.read(sendKeyboardTextUseCaseProvider)(diff.inserted);
       }
     } catch (_) {
       _lastRealtimeText = value;
     }
+  }
+
+  bool get _isComposingText {
+    final composing = _textController.value.composing;
+    return composing.isValid && !composing.isCollapsed;
   }
 
   _TextDiff _textDiff(String previous, String current) {
@@ -78,13 +79,12 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
       currentSuffix--;
     }
 
-    final deleteCount = previousSuffix - prefixLength;
     final inserted = currentChars
         .skip(prefixLength)
         .take(currentSuffix - prefixLength)
         .join();
 
-    return _TextDiff(deleteCount: deleteCount, inserted: inserted);
+    return _TextDiff(inserted: inserted);
   }
 
   void _clearLocalText() {
@@ -253,11 +253,9 @@ final _numberKeys = List.generate(
 
 class _TextDiff {
   const _TextDiff({
-    required this.deleteCount,
     required this.inserted,
   });
 
-  final int deleteCount;
   final String inserted;
 }
 
