@@ -33,6 +33,11 @@ class EnStrings extends AppStrings {
   String get mouseSensitivityDescription =>
       'Controls how fast the PC cursor moves from touchpad gestures.';
   @override
+  String get autoConnect => 'Auto connect';
+  @override
+  String get autoConnectDescription =>
+      'Reconnect automatically to the last PC when the app opens.';
+  @override
   String get reset => 'Reset';
   @override
   String get connection => 'Connection';

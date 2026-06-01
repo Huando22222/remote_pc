@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pc_remote/features/main/presentation/screens/main_shell_screen.dart';
-import 'package:pc_remote/features/clipboard/presentation/screens/clip_board_screen.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/features/file_transfer/presentation/screens/file_transfer_screen.dart';
@@ -77,10 +76,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: Routes.fileTransfer,
             builder: (context, state) => const FileTransferScreen(),
           ),
-          GoRoute(
-            path: Routes.clipboard,
-            builder: (context, state) => const ClipboardScreen(),
-          ),
+          // Clipboard is hidden until the feature is ready for production use.
+          // GoRoute(
+          //   path: Routes.clipboard,
+          //   builder: (context, state) => const ClipboardScreen(),
+          // ),
           GoRoute(
             path: Routes.settings,
             builder: (context, state) => const SettingsScreen(),

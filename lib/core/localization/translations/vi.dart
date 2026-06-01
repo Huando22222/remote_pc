@@ -33,6 +33,11 @@ class ViStrings extends AppStrings {
   String get mouseSensitivityDescription =>
       'Điều chỉnh tốc độ con trỏ PC khi rê trên touchpad.';
   @override
+  String get autoConnect => 'Tự động kết nối';
+  @override
+  String get autoConnectDescription =>
+      'Tự kết nối lại PC gần nhất khi mở ứng dụng.';
+  @override
   String get reset => 'Đặt lại';
   @override
   String get connection => 'Kết nối';

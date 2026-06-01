@@ -63,6 +63,15 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const Divider(height: AppSpacing.xl),
+        SwitchListTile(
+          value: settings.autoConnect,
+          onChanged: notifier.setAutoConnect,
+          contentPadding: EdgeInsets.zero,
+          secondary: const Icon(Icons.link_rounded),
+          title: Text(strings.autoConnect),
+          subtitle: Text(strings.autoConnectDescription),
+        ),
+        const Divider(height: AppSpacing.xl),
         Text(strings.language, style: tt.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         SegmentedButton<String>(

@@ -8,7 +8,7 @@ class ConnectionSocketDatasource {
   ConnectionSocketDatasource(this.socketClient);
 
   Future<void> connect(String ip) async {
-    socketClient.connect(ip);
+    await socketClient.connect(ip);
   }
 
   Future<void> disconnect() async {

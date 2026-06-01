@@ -81,15 +81,16 @@ class DrawerWidget extends ConsumerWidget {
                       label: strings.fileTransfer,
                       isActive: currentRoute == Routes.fileTransfer,
                     ),
-                    _DrawerItem(
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.go(Routes.clipboard);
-                      },
-                      icon: FontAwesomeIcons.clipboard,
-                      label: strings.clipboard,
-                      isActive: currentRoute == Routes.clipboard,
-                    ),
+                    // Clipboard is hidden until the feature is ready for production use.
+                    // _DrawerItem(
+                    //   onTap: () {
+                    //     Navigator.pop(context);
+                    //     context.go(Routes.clipboard);
+                    //   },
+                    //   icon: FontAwesomeIcons.clipboard,
+                    //   label: strings.clipboard,
+                    //   isActive: currentRoute == Routes.clipboard,
+                    // ),
                     _DrawerItem(
                       onTap: () {
                         Navigator.pop(context);
