@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/core/constants/api_constants.dart';
@@ -99,9 +100,24 @@ class SocketClient {
     _onDisconnected = callback;
   }
 
-  void emit(String event, dynamic data) {
-    _socket?.emit(event, data);
-    _socket?.io.engine.flush();
+  bool emit(String event, dynamic data) {
+    try {
+      if (_socket?.connected != true) {
+        log('Skip emit $event because socket is not connected');
+        return false;
+      }
+
+      _socket?.emit(event, data);
+      _socket?.io.engine.flush();
+      return true;
+    } catch (error, stackTrace) {
+      log(
+        'Socket emit failed: $event',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 
   void disconnect() {

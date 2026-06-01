@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:pc_remote/core/config/routes.dart';
 import 'package:pc_remote/core/helpers/in_app_notification_helper.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
@@ -100,12 +98,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(connectionNotifierProvider, (previous, next) {
-      if (next == ConnectionStatus.connected) {
-        context.go(Routes.touchpad);
-      }
-    });
-
     final status = ref.watch(connectionNotifierProvider);
     final downloadedFiles = ref.watch(downloadedFilesProvider);
     final settings = ref.watch(appSettingsProvider);

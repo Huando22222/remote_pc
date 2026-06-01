@@ -27,32 +27,58 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
   }
 
   Future<void> _onRealtimeTextChanged(String value) async {
-    if (_ignoreNextTextChange) {
-      _ignoreNextTextChange = false;
-      _lastRealtimeText = value;
-      return;
-    }
-
-    final previous = _lastRealtimeText;
-    _lastRealtimeText = value;
-
-    if (value == previous) return;
-
-    if (value.length > previous.length && value.startsWith(previous)) {
-      final inserted = value.substring(previous.length);
-      if (inserted.isNotEmpty) {
-        await ref.read(sendKeyboardTextUseCaseProvider)(inserted);
+    try {
+      if (_ignoreNextTextChange) {
+        _ignoreNextTextChange = false;
+        _lastRealtimeText = value;
+        return;
       }
-      return;
-    }
 
-    if (value.length < previous.length && previous.startsWith(value)) {
-      final deleteCount = previous.length - value.length;
+      final previous = _lastRealtimeText;
+      _lastRealtimeText = value;
+
+      if (value == previous) return;
+
+      final diff = _textDiff(previous, value);
       final sendKey = ref.read(sendKeyboardKeyUseCaseProvider);
-      for (var i = 0; i < deleteCount; i++) {
+
+      for (var i = 0; i < diff.deleteCount; i++) {
         await sendKey('backspace');
       }
+
+      if (diff.inserted.isNotEmpty) {
+        await ref.read(sendKeyboardTextUseCaseProvider)(diff.inserted);
+      }
+    } catch (_) {
+      _lastRealtimeText = value;
     }
+  }
+
+  _TextDiff _textDiff(String previous, String current) {
+    var prefixLength = 0;
+    final minLength =
+        previous.length < current.length ? previous.length : current.length;
+
+    while (prefixLength < minLength &&
+        previous.codeUnitAt(prefixLength) == current.codeUnitAt(prefixLength)) {
+      prefixLength++;
+    }
+
+    var previousSuffix = previous.length;
+    var currentSuffix = current.length;
+    while (previousSuffix > prefixLength &&
+        currentSuffix > prefixLength &&
+        previous.codeUnitAt(previousSuffix - 1) ==
+            current.codeUnitAt(currentSuffix - 1)) {
+      previousSuffix--;
+      currentSuffix--;
+    }
+
+    final removedText = previous.substring(prefixLength, previousSuffix);
+    final deleteCount = removedText.runes.length;
+    final inserted = current.substring(prefixLength, currentSuffix);
+
+    return _TextDiff(deleteCount: deleteCount, inserted: inserted);
   }
 
   void _clearLocalText() {
@@ -146,15 +172,15 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _KeySection(
-                    title: 'Editing keys',
-                    keys: const [
-                      _KeyboardKey('A', 'a', Icons.text_fields_rounded),
-                      _KeyboardKey('C', 'c', Icons.content_copy_rounded),
-                      _KeyboardKey('V', 'v', Icons.content_paste_rounded),
-                      _KeyboardKey('X', 'x', Icons.content_cut_rounded),
-                      _KeyboardKey('Z', 'z', Icons.undo_rounded),
-                      _KeyboardKey('Y', 'y', Icons.redo_rounded),
-                    ],
+                    title: 'Letters',
+                    keys: _letterKeys,
+                    heldKeys: _heldKeys,
+                    onToggle: _toggleHeldKey,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _KeySection(
+                    title: 'Numbers',
+                    keys: _numberKeys,
                     heldKeys: _heldKeys,
                     onToggle: _toggleHeldKey,
                   ),
@@ -201,6 +227,32 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
       ),
     );
   }
+}
+
+final _letterKeys = List.generate(
+  26,
+  (index) {
+    final letter = String.fromCharCode('A'.codeUnitAt(0) + index);
+    return _KeyboardKey(
+        letter, letter.toLowerCase(), Icons.text_fields_rounded);
+  },
+  growable: false,
+);
+
+final _numberKeys = List.generate(
+  10,
+  (index) => _KeyboardKey('$index', '$index', Icons.pin_rounded),
+  growable: false,
+);
+
+class _TextDiff {
+  const _TextDiff({
+    required this.deleteCount,
+    required this.inserted,
+  });
+
+  final int deleteCount;
+  final String inserted;
 }
 
 class _Header extends StatelessWidget {
