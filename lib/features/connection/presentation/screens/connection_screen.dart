@@ -42,7 +42,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       InAppNotificationHelper.warning(
         context,
         title: 'Invalid IP',
-        message: 'Enter a valid PC IP, for example 192.168.1.10.',
+        message: 'Enter a valid PC IP, for example 192.168.X.XX.',
       );
       return;
     }
@@ -246,10 +246,18 @@ class _FeatureGrid extends StatelessWidget {
           ],
         ),
         SizedBox(height: 10),
-        _FeatureCard(
-          icon: Icons.folder_zip_rounded,
-          label: 'Files',
-          description: 'Send and receive',
+        Row(
+          children: [
+            Expanded(
+              child: _FeatureCard(
+                icon: Icons.folder_zip_rounded,
+                label: 'Files',
+                description: 'Send and receive',
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(child: SizedBox())
+          ],
         ),
       ],
     );
