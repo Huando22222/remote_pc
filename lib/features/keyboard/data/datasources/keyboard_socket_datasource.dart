@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +17,12 @@ class KeyboardSocketDatasource {
   final SocketClient socketClient;
 
   Future<void> sendText(String text) async {
-    log('emit keyboard_text "$text"', name: 'KeyboardSocketDatasource');
-    socketClient.emit(SocketConstants.eventKeyboardText, {'text': text});
+    final payload = jsonEncode({'text': text});
+    log(
+      'emit keyboard_text "$text", length=${text.length}, runes=${text.runes.length}',
+      name: 'KeyboardSocketDatasource',
+    );
+    socketClient.emit(SocketConstants.eventKeyboardText, payload);
   }
 
   Future<void> sendKey(String key) async {
