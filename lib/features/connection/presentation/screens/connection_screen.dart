@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pc_remote/core/helpers/in_app_notification_helper.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
+import 'package:pc_remote/features/connection/presentation/providers/connection_history_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
+import 'package:pc_remote/features/device/presentation/providers/remote_device_provider.dart';
 import 'package:pc_remote/features/file_transfer/presentation/providers/downloaded_files_provider.dart';
 import 'package:pc_remote/features/file_transfer/presentation/widgets/downloaded_files_sheet.dart';
 import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
@@ -19,12 +21,12 @@ class ConnectionScreen extends ConsumerStatefulWidget {
 
 class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   final _ipController = TextEditingController();
-  bool _autoConnectAttempted = false;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(_tryAutoConnect);
+    // Auto-connect is temporarily disabled until the reconnect flow is stable.
+    // Future.microtask(_tryAutoConnect);
   }
 
   @override
@@ -48,6 +50,14 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     try {
       await ref.read(connectionNotifierProvider.notifier).connect(ip);
       await ref.read(appSettingsProvider.notifier).setLastConnectedIp(ip);
+      await ref.read(connectionHistoryProvider.notifier).upsertIp(ip);
+      final remoteDevices = ref.read(remoteDeviceProvider);
+      if (remoteDevices.isNotEmpty) {
+        await ref.read(connectionHistoryProvider.notifier).updateDeviceInfo(
+              remoteDevices.first,
+              connectedIp: ip,
+            );
+      }
     } catch (_) {
       if (!mounted) return;
       InAppNotificationHelper.error(
@@ -57,18 +67,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             'Cannot connect to PC. Check that both devices are on the same Wi-Fi and the server is running.',
       );
     }
-  }
-
-  Future<void> _tryAutoConnect() async {
-    if (_autoConnectAttempted || !mounted) return;
-    _autoConnectAttempted = true;
-
-    final settings = ref.read(appSettingsProvider);
-    final ip = settings.lastConnectedIp;
-    if (!settings.autoConnect || ip == null || !_isIpv4(ip)) return;
-
-    _ipController.text = ip;
-    await _handleConnect();
   }
 
   void _openQrScanner() {
@@ -81,6 +79,28 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           },
         ),
       ),
+    );
+  }
+
+  void _openConnectionHistory() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final history = ref.watch(connectionHistoryProvider);
+            return _ConnectionHistorySheet(
+              history: history,
+              onSelected: (entry) {
+                Navigator.of(context).pop();
+                _ipController.text = entry.ip;
+                _handleConnect();
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -124,6 +144,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 autoConnect: settings.autoConnect,
                 onConnect: _handleConnect,
                 onScanQr: _openQrScanner,
+                onOpenHistory: _openConnectionHistory,
                 onAutoConnectChanged:
                     ref.read(appSettingsProvider.notifier).setAutoConnect,
               ),
@@ -287,6 +308,87 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
+class _ConnectionHistorySheet extends StatelessWidget {
+  const _ConnectionHistorySheet({
+    required this.history,
+    required this.onSelected,
+  });
+
+  final List<ConnectionHistoryEntry> history;
+  final ValueChanged<ConnectionHistoryEntry> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Connected PCs',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (history.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'No connected PC yet',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: history.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final item = history[index];
+                    return ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      tileColor:
+                          colorScheme.surfaceContainerHighest.withOpacity(0.45),
+                      leading: const Icon(Icons.computer_rounded),
+                      title: Text(
+                        item.deviceName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        [
+                          item.ip,
+                          if (item.platform.isNotEmpty) item.platform,
+                        ].join(' • '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => onSelected(item),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ConnectionCard extends StatelessWidget {
   const _ConnectionCard({
     required this.ipController,
@@ -294,6 +396,7 @@ class _ConnectionCard extends StatelessWidget {
     required this.autoConnect,
     required this.onConnect,
     required this.onScanQr,
+    required this.onOpenHistory,
     required this.onAutoConnectChanged,
   });
 
@@ -302,6 +405,7 @@ class _ConnectionCard extends StatelessWidget {
   final bool autoConnect;
   final VoidCallback onConnect;
   final VoidCallback onScanQr;
+  final VoidCallback onOpenHistory;
   final ValueChanged<bool> onAutoConnectChanged;
 
   @override
@@ -355,14 +459,20 @@ class _ConnectionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          CheckboxListTile(
-            value: autoConnect,
-            onChanged: (value) => onAutoConnectChanged(value ?? true),
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Auto connect'),
-            subtitle: const Text('Reconnect to this PC next time'),
+          OutlinedButton.icon(
+            onPressed: onOpenHistory,
+            icon: const Icon(Icons.history_rounded),
+            label: const Text('Connected PCs'),
           ),
+          // Auto-connect is temporarily hidden until the reconnect flow is stable.
+          // CheckboxListTile(
+          //   value: autoConnect,
+          //   onChanged: (value) => onAutoConnectChanged(value ?? true),
+          //   contentPadding: EdgeInsets.zero,
+          //   controlAffinity: ListTileControlAffinity.leading,
+          //   title: const Text('Auto connect'),
+          //   subtitle: const Text('Reconnect to this PC next time'),
+          // ),
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: isConnected || isConnecting ? null : onConnect,

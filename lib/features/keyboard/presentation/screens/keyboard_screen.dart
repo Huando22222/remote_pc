@@ -15,10 +15,18 @@ class KeyboardScreen extends ConsumerStatefulWidget {
 }
 
 class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
+  static const _emptyBackspaceSentinel = '\u2060';
+
   final _textController = TextEditingController();
   final Set<String> _heldKeys = {};
   String _lastRealtimeText = '';
   bool _ignoreNextTextChange = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetTextSentinel();
+  }
 
   @override
   void dispose() {
@@ -30,18 +38,25 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
     try {
       if (_ignoreNextTextChange) {
         _ignoreNextTextChange = false;
-        _lastRealtimeText = value;
+        _lastRealtimeText = _stripSentinel(value);
         return;
       }
 
       if (_isComposingText) return;
 
+      if (!value.startsWith(_emptyBackspaceSentinel)) {
+        await ref.read(sendKeyboardKeyUseCaseProvider)('backspace');
+        _resetTextSentinel();
+        return;
+      }
+
+      final normalizedValue = _stripSentinel(value);
       final previous = _lastRealtimeText;
-      _lastRealtimeText = value;
+      _lastRealtimeText = normalizedValue;
 
-      if (value == previous) return;
+      if (normalizedValue == previous) return;
 
-      final diff = _textDiff(previous, value);
+      final diff = _textDiff(previous, normalizedValue);
       final sendKey = ref.read(sendKeyboardKeyUseCaseProvider);
 
       for (var i = 0; i < diff.deleteCount; i++) {
@@ -94,9 +109,22 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
   }
 
   void _clearLocalText() {
-    _ignoreNextTextChange = true;
-    _textController.clear();
     _lastRealtimeText = '';
+    _resetTextSentinel();
+  }
+
+  String _stripSentinel(String value) {
+    return value.replaceAll(_emptyBackspaceSentinel, '');
+  }
+
+  void _resetTextSentinel() {
+    _textController.value = const TextEditingValue(
+      text: _emptyBackspaceSentinel,
+      selection: TextSelection.collapsed(
+        offset: _emptyBackspaceSentinel.length,
+      ),
+    );
+    _ignoreNextTextChange = false;
   }
 
   void _toggleHeldKey(String key) {

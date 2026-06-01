@@ -8,4 +8,5 @@ class PrefConstants {
   static const scrollSensitivity = 'scroll_sensitivity';
   static const autoConnect = 'auto_connect';
   static const lastConnectedIp = 'last_connected_ip';
+  static const connectionHistory = 'connection_history';
 }
