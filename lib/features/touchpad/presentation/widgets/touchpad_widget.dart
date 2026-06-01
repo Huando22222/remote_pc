@@ -23,7 +23,6 @@ const _kTapMaxMs = 200; // ms — nhả trong thời gian này → tap hợp l�
 const _kDoubleTapMs = 280; // ms — window detect double-tap
 const _kSingleTapDelayMs = 280; // ms — delay trước khi fire leftClick
 //      (= _kDoubleTapMs, để không fire trước double-tap)
-const _kScrollSensitivity = 1.0; // delta Flutter đã đủ lớn
 const _kMoveSmoothAlpha = 0.4; // EMA alpha cho move: nhỏ=mượt, lớn=nhanh hơn
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -37,6 +36,7 @@ class TouchpadWidget extends StatefulWidget {
   final ScrollUseCase scroll;
   final SwipeUseCase swipe;
   final double mouseSensitivity;
+  final double scrollSensitivity;
 
   const TouchpadWidget({
     super.key,
@@ -49,6 +49,7 @@ class TouchpadWidget extends StatefulWidget {
     required this.scroll,
     required this.swipe,
     required this.mouseSensitivity,
+    required this.scrollSensitivity,
   });
 
   @override
@@ -252,11 +253,14 @@ class _TouchpadWidgetState extends State<TouchpadWidget> {
   }
 
   void _scroll(Offset d) {
-    log('scroll dx=${-d.dx}, dy=${-d.dy}', name: 'TouchpadWidget');
+    log(
+      'scroll dx=${-d.dx}, dy=${-d.dy}, sensitivity=${widget.scrollSensitivity}',
+      name: 'TouchpadWidget',
+    );
     widget.scroll(
       ScrollDelta(
-        dx: -d.dx * _kScrollSensitivity,
-        dy: -d.dy * _kScrollSensitivity,
+        dx: -d.dx * widget.scrollSensitivity,
+        dy: -d.dy * widget.scrollSensitivity,
       ),
     );
   }

@@ -5,21 +5,25 @@ import 'package:pc_remote/core/providers/core_providers.dart';
 class AppSettingsState {
   const AppSettingsState({
     required this.mouseSensitivity,
+    required this.scrollSensitivity,
     required this.autoConnect,
     required this.lastConnectedIp,
   });
 
   final double mouseSensitivity;
+  final double scrollSensitivity;
   final bool autoConnect;
   final String? lastConnectedIp;
 
   AppSettingsState copyWith({
     double? mouseSensitivity,
+    double? scrollSensitivity,
     bool? autoConnect,
     String? lastConnectedIp,
   }) {
     return AppSettingsState(
       mouseSensitivity: mouseSensitivity ?? this.mouseSensitivity,
+      scrollSensitivity: scrollSensitivity ?? this.scrollSensitivity,
       autoConnect: autoConnect ?? this.autoConnect,
       lastConnectedIp: lastConnectedIp ?? this.lastConnectedIp,
     );
@@ -28,6 +32,7 @@ class AppSettingsState {
 
 class AppSettingsNotifier extends Notifier<AppSettingsState> {
   static const defaultMouseSensitivity = 1.0;
+  static const defaultScrollSensitivity = 0.7;
 
   @override
   AppSettingsState build() {
@@ -35,6 +40,8 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
     return AppSettingsState(
       mouseSensitivity: storage.getDouble(PrefConstants.mouseSensitivity) ??
           defaultMouseSensitivity,
+      scrollSensitivity: storage.getDouble(PrefConstants.scrollSensitivity) ??
+          defaultScrollSensitivity,
       autoConnect: storage.getBool(PrefConstants.autoConnect) ?? true,
       lastConnectedIp: storage.getString(PrefConstants.lastConnectedIp),
     );
@@ -50,6 +57,18 @@ class AppSettingsNotifier extends Notifier<AppSettingsState> {
 
   Future<void> resetMouseSensitivity() {
     return setMouseSensitivity(defaultMouseSensitivity);
+  }
+
+  Future<void> setScrollSensitivity(double value) async {
+    final nextValue = value.clamp(0.2, 2.0).toDouble();
+    state = state.copyWith(scrollSensitivity: nextValue);
+    await ref
+        .read(localStorageProvider)
+        .setDouble(PrefConstants.scrollSensitivity, nextValue);
+  }
+
+  Future<void> resetScrollSensitivity() {
+    return setScrollSensitivity(defaultScrollSensitivity);
   }
 
   Future<void> setAutoConnect(bool value) async {

@@ -33,6 +33,11 @@ class EnStrings extends AppStrings {
   String get mouseSensitivityDescription =>
       'Controls how fast the PC cursor moves from touchpad gestures.';
   @override
+  String get scrollSensitivity => 'Scroll sensitivity';
+  @override
+  String get scrollSensitivityDescription =>
+      'Controls how fast two-finger scrolling moves on the PC.';
+  @override
   String get autoConnect => 'Auto connect';
   @override
   String get autoConnectDescription =>

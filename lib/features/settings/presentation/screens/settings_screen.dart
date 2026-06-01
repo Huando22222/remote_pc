@@ -63,6 +63,44 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const Divider(height: AppSpacing.xl),
+        Text(strings.scrollSensitivity, style: tt.titleMedium),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          strings.scrollSensitivityDescription,
+          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: Slider(
+                min: 0.2,
+                max: 2.0,
+                divisions: 18,
+                value: settings.scrollSensitivity,
+                label: '${settings.scrollSensitivity.toStringAsFixed(1)}x',
+                onChanged: notifier.setScrollSensitivity,
+              ),
+            ),
+            SizedBox(
+              width: 56,
+              child: Text(
+                '${settings.scrollSensitivity.toStringAsFixed(1)}x',
+                textAlign: TextAlign.end,
+                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: notifier.resetScrollSensitivity,
+            icon: const Icon(Icons.restart_alt_rounded),
+            label: Text(strings.reset),
+          ),
+        ),
+        const Divider(height: AppSpacing.xl),
         SwitchListTile(
           value: settings.autoConnect,
           onChanged: notifier.setAutoConnect,

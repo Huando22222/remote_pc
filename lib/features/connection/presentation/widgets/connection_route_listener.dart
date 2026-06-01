@@ -19,11 +19,16 @@ class ConnectionRouteListener extends ConsumerWidget {
     ref.listen<ConnectionStatus>(
       connectionNotifierProvider,
       (previous, next) {
-        final wasConnected = previous == ConnectionStatus.connected ||
-            previous == ConnectionStatus.connecting;
-        final isDisconnected = next == ConnectionStatus.disconnected;
+        if (previous == next) return;
 
-        if (!wasConnected || !isDisconnected) return;
+        final shouldEnterRemoteSurface = next == ConnectionStatus.connected &&
+            previous != ConnectionStatus.connected;
+        final shouldReturnToConnection =
+            next == ConnectionStatus.disconnected &&
+                (previous == ConnectionStatus.connected ||
+                    previous == ConnectionStatus.connecting);
+
+        if (!shouldEnterRemoteSurface && !shouldReturnToConnection) return;
 
         FocusManager.instance.primaryFocus?.unfocus();
 
@@ -35,9 +40,16 @@ class ConnectionRouteListener extends ConsumerWidget {
           final currentLocation =
               router.routeInformationProvider.value.uri.path;
 
-          if (currentLocation == Routes.connection) return;
+          if (shouldEnterRemoteSurface &&
+              currentLocation == Routes.connection) {
+            router.go(Routes.touchpad);
+            return;
+          }
 
-          router.go(Routes.connection);
+          if (shouldReturnToConnection &&
+              currentLocation != Routes.connection) {
+            router.go(Routes.connection);
+          }
         });
       },
     );

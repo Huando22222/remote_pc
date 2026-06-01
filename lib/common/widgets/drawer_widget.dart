@@ -108,7 +108,10 @@ class DrawerWidget extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.sm),
               child: _DrawerItem(
                 onTap: () {
-                  cn.disconnect();
+                  Navigator.of(context).pop();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    cn.disconnect();
+                  });
                 },
                 icon: FontAwesomeIcons.linkSlash,
                 label: strings.disconnect,

@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -43,6 +42,12 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
       if (value == previous) return;
 
       final diff = _textDiff(previous, value);
+      final sendKey = ref.read(sendKeyboardKeyUseCaseProvider);
+
+      for (var i = 0; i < diff.deleteCount; i++) {
+        await sendKey('backspace');
+      }
+
       if (diff.inserted.isNotEmpty) {
         await ref.read(sendKeyboardTextUseCaseProvider)(diff.inserted);
       }
@@ -79,12 +84,13 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
       currentSuffix--;
     }
 
+    final deleteCount = previousSuffix - prefixLength;
     final inserted = currentChars
         .skip(prefixLength)
         .take(currentSuffix - prefixLength)
         .join();
 
-    return _TextDiff(inserted: inserted);
+    return _TextDiff(deleteCount: deleteCount, inserted: inserted);
   }
 
   void _clearLocalText() {
@@ -138,6 +144,7 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
   @override
   Widget build(BuildContext context) {
     final remoteDevices = ref.watch(remoteDeviceProvider);
+    final mediaQuery = MediaQuery.of(context);
     final serverPlatform = remoteDevices.firstOrNull?.platform.toLowerCase();
     final isMac = serverPlatform == 'macos' || serverPlatform == 'darwin';
     final metaKey = isMac ? 'cmd' : 'win';
@@ -145,91 +152,91 @@ class _KeyboardScreenState extends ConsumerState<KeyboardScreen> {
     final metaIcon =
         isMac ? Icons.keyboard_command_key_rounded : FontAwesomeIcons.windows;
 
-    return SafeArea(
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                ),
-                children: [
-                  _Header(platformLabel: isMac ? 'macOS' : 'Windows'),
-                  const SizedBox(height: AppSpacing.md),
-                  _RealtimeTextPanel(
-                    controller: _textController,
-                    onChanged: _onRealtimeTextChanged,
-                    onClear: _clearLocalText,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _HoldPanel(
-                    heldKeys: _heldKeys,
-                    metaKey: metaKey,
-                    metaLabel: metaLabel,
-                    metaIcon: metaIcon,
-                    onToggle: _toggleHeldKey,
-                    onClear: _clearHeldKeys,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _KeySection(
-                    title: 'Letters',
-                    keys: _letterKeys,
-                    heldKeys: _heldKeys,
-                    onToggle: _toggleHeldKey,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _KeySection(
-                    title: 'Numbers',
-                    keys: _numberKeys,
-                    heldKeys: _heldKeys,
-                    onToggle: _toggleHeldKey,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _KeySection(
-                    title: 'Common keys',
-                    keys: const [
-                      _KeyboardKey('Esc', 'escape', FontAwesomeIcons.eject),
-                      _KeyboardKey('Tab', 'tab', FontAwesomeIcons.rightLeft),
-                      _KeyboardKey('Shot', 'printScreen',
-                          Icons.screenshot_monitor_rounded),
-                      _KeyboardKey(
-                          'Back', 'backspace', Icons.backspace_rounded),
-                      _KeyboardKey(
-                          'Del', 'delete', Icons.delete_outline_rounded),
-                      _KeyboardKey(
-                          'Enter', 'enter', Icons.keyboard_return_rounded),
-                      _KeyboardKey('Space', 'space', Icons.space_bar_rounded),
-                    ],
-                    heldKeys: _heldKeys,
-                    onToggle: _toggleHeldKey,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _NavigationSection(
-                    heldKeys: _heldKeys,
-                    onToggle: _toggleHeldKey,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _FunctionKeySection(
-                    heldKeys: _heldKeys,
-                    onToggle: _toggleHeldKey,
-                  ),
-                ],
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                mediaQuery.padding.top + AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.lg,
               ),
+              children: [
+                _Header(platformLabel: isMac ? 'macOS' : 'Windows'),
+                const SizedBox(height: AppSpacing.md),
+                _RealtimeTextPanel(
+                  controller: _textController,
+                  onChanged: _onRealtimeTextChanged,
+                  onSubmitted: (_) async {
+                    await ref.read(sendKeyboardKeyUseCaseProvider)('enter');
+                  },
+                  onClear: _clearLocalText,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _HoldPanel(
+                  heldKeys: _heldKeys,
+                  metaKey: metaKey,
+                  metaLabel: metaLabel,
+                  metaIcon: metaIcon,
+                  onToggle: _toggleHeldKey,
+                  onClear: _clearHeldKeys,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _KeySection(
+                  title: 'Letters',
+                  keys: _letterKeys,
+                  heldKeys: _heldKeys,
+                  onToggle: _toggleHeldKey,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _KeySection(
+                  title: 'Numbers',
+                  keys: _numberKeys,
+                  heldKeys: _heldKeys,
+                  onToggle: _toggleHeldKey,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _KeySection(
+                  title: 'Common keys',
+                  keys: const [
+                    _KeyboardKey('Esc', 'escape', FontAwesomeIcons.eject),
+                    _KeyboardKey('Tab', 'tab', FontAwesomeIcons.rightLeft),
+                    _KeyboardKey('Shot', 'printScreen',
+                        Icons.screenshot_monitor_rounded),
+                    _KeyboardKey('Back', 'backspace', Icons.backspace_rounded),
+                    _KeyboardKey('Del', 'delete', Icons.delete_outline_rounded),
+                    _KeyboardKey(
+                        'Enter', 'enter', Icons.keyboard_return_rounded),
+                    _KeyboardKey('Space', 'space', Icons.space_bar_rounded),
+                  ],
+                  heldKeys: _heldKeys,
+                  onToggle: _toggleHeldKey,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _NavigationSection(
+                  heldKeys: _heldKeys,
+                  onToggle: _toggleHeldKey,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _FunctionKeySection(
+                  heldKeys: _heldKeys,
+                  onToggle: _toggleHeldKey,
+                ),
+              ],
             ),
-            _ReleaseBar(
-              heldKeys: _heldKeys,
-              metaKey: metaKey,
-              metaLabel: metaLabel,
-              onRelease: _releaseHeldKeys,
-            ),
-          ],
-        ),
+          ),
+          _ReleaseBar(
+            bottomPadding: mediaQuery.padding.bottom,
+            heldKeys: _heldKeys,
+            metaKey: metaKey,
+            metaLabel: metaLabel,
+            onRelease: _releaseHeldKeys,
+          ),
+        ],
       ),
     );
   }
@@ -253,9 +260,11 @@ final _numberKeys = List.generate(
 
 class _TextDiff {
   const _TextDiff({
+    required this.deleteCount,
     required this.inserted,
   });
 
+  final int deleteCount;
   final String inserted;
 }
 
@@ -313,11 +322,13 @@ class _RealtimeTextPanel extends StatelessWidget {
   const _RealtimeTextPanel({
     required this.controller,
     required this.onChanged,
+    required this.onSubmitted,
     required this.onClear,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
 
   @override
@@ -334,7 +345,9 @@ class _RealtimeTextPanel extends StatelessWidget {
         minLines: 2,
         maxLines: 4,
         onChanged: onChanged,
-        textInputAction: TextInputAction.newline,
+        onSubmitted: onSubmitted,
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.send,
         decoration: const InputDecoration(
           hintText: 'Text is sent while you type',
           prefixIcon: Icon(Icons.text_fields_rounded),
@@ -415,12 +428,14 @@ class _HoldPanel extends StatelessWidget {
 
 class _ReleaseBar extends StatelessWidget {
   const _ReleaseBar({
+    required this.bottomPadding,
     required this.heldKeys,
     required this.metaKey,
     required this.metaLabel,
     required this.onRelease,
   });
 
+  final double bottomPadding;
   final Set<String> heldKeys;
   final String metaKey;
   final String metaLabel;
@@ -438,11 +453,11 @@ class _ReleaseBar extends StatelessWidget {
       elevation: 8,
       shadowColor: colorScheme.shadow.withOpacity(0.25),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.sm,
           AppSpacing.md,
-          AppSpacing.md,
+          AppSpacing.md + bottomPadding,
         ),
         child: Row(
           children: [

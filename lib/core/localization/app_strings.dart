@@ -14,6 +14,8 @@ abstract class AppStrings {
   String get vietnamese;
   String get mouseSensitivity;
   String get mouseSensitivityDescription;
+  String get scrollSensitivity;
+  String get scrollSensitivityDescription;
   String get autoConnect;
   String get autoConnectDescription;
   String get reset;

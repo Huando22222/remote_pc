@@ -33,6 +33,7 @@ class _TouchpadScreenState extends ConsumerState<TouchpadScreen> {
       scroll: ref.read(scrollUseCaseProvider),
       swipe: ref.read(swipeUseCaseProvider),
       mouseSensitivity: settings.mouseSensitivity,
+      scrollSensitivity: settings.scrollSensitivity,
     );
   }
 }
