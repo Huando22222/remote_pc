@@ -32,7 +32,13 @@ class ConnectionRouteListener extends ConsumerWidget {
 
         FocusManager.instance.primaryFocus?.unfocus();
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final navigator = rootNavigatorKey.currentState;
+          if (navigator?.canPop() ?? false) {
+            await navigator!.maybePop();
+            await Future<void>.delayed(const Duration(milliseconds: 180));
+          }
+
           final navigatorContext = rootNavigatorKey.currentContext;
           if (navigatorContext == null) return;
 

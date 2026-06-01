@@ -109,9 +109,10 @@ class DrawerWidget extends ConsumerWidget {
               child: _DrawerItem(
                 onTap: () {
                   Navigator.of(context).pop();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    cn.disconnect();
-                  });
+                  Future<void>.delayed(
+                    const Duration(milliseconds: 220),
+                    cn.disconnect,
+                  );
                 },
                 icon: FontAwesomeIcons.linkSlash,
                 label: strings.disconnect,
