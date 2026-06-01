@@ -39,6 +39,7 @@ class SocketClient {
       io.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
+          .disableReconnection()
           .enableForceNew()
           .build(),
     );
@@ -121,7 +122,11 @@ class SocketClient {
   }
 
   void disconnect() {
-    _socket?.disconnect();
+    final socket = _socket;
+    _socket = null;
+    socket?.disconnect();
+    socket?.dispose();
+    _connectionController.add(false);
   }
 
   void dispose() {

@@ -8,6 +8,7 @@ import 'package:pc_remote/features/connection/presentation/providers/connection_
 import 'package:pc_remote/features/device/domain/entities/device_entity.dart';
 import 'package:pc_remote/features/device/presentation/providers/device_provider.dart';
 import 'package:pc_remote/features/device/presentation/providers/remote_device_provider.dart';
+import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 
@@ -20,6 +21,7 @@ class DrawerWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final cn = ref.read(connectionNotifierProvider.notifier);
+    final settingsNotifier = ref.read(appSettingsProvider.notifier);
     final currentRoute = GoRouterState.of(context).matchedLocation;
     final svDv = ref.watch(deviceProvider);
     final rmtDv = ref.watch(remoteDeviceProvider);
@@ -107,13 +109,7 @@ class DrawerWidget extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.sm),
               child: _DrawerItem(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Future<void>.delayed(
-                    const Duration(milliseconds: 220),
-                    cn.disconnect,
-                  );
-                },
+                onTap: () => _disconnect(context, cn, settingsNotifier),
                 icon: FontAwesomeIcons.linkSlash,
                 label: strings.disconnect,
                 isDanger: true,
@@ -123,6 +119,18 @@ class DrawerWidget extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _disconnect(
+    BuildContext context,
+    ConnectionNotifier notifier,
+    AppSettingsNotifier settingsNotifier,
+  ) async {
+    Scaffold.maybeOf(context)?.closeDrawer();
+    await Future<void>.delayed(kThemeAnimationDuration);
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    await settingsNotifier.setAutoConnect(false);
+    await notifier.disconnect();
   }
 }
 
