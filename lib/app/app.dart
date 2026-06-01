@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pc_remote/core/localization/locale_provider.dart';
 import 'package:pc_remote/core/theme/theme_provider.dart';
+import 'package:pc_remote/features/connection/presentation/widgets/connection_route_listener.dart';
 import 'package:pc_remote/features/file_transfer/presentation/widgets/incoming_files_listener.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -45,7 +46,9 @@ class _AppState extends ConsumerState<App> {
         return Builder(
           builder: (context) {
             return IncomingFilesListener(
-              child: child ?? const SizedBox.shrink(),
+              child: ConnectionRouteListener(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         );
