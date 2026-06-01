@@ -17,9 +17,13 @@ class KeyboardSocketDatasource {
   final SocketClient socketClient;
 
   Future<void> sendText(String text) async {
-    final payload = jsonEncode({'text': text});
+    final textBase64 = base64Encode(utf8.encode(text));
+    final payload = jsonEncode({
+      'encoding': 'utf8.base64',
+      'textBase64': textBase64,
+    });
     log(
-      'emit keyboard_text "$text", length=${text.length}, runes=${text.runes.length}',
+      'emit keyboard_text text="$text", length=${text.length}, runes=${text.runes.length}, codePoints=${_codePoints(text)}, base64=$textBase64, payload=$payload',
       name: 'KeyboardSocketDatasource',
     );
     socketClient.emit(SocketConstants.eventKeyboardText, payload);
@@ -34,5 +38,11 @@ class KeyboardSocketDatasource {
     log('emit keyboard_shortcut ${keys.join('+')}',
         name: 'KeyboardSocketDatasource');
     socketClient.emit(SocketConstants.eventKeyboardShortcut, {'keys': keys});
+  }
+
+  String _codePoints(String text) {
+    return text.runes
+        .map((value) => 'U+${value.toRadixString(16).toUpperCase()}')
+        .join(' ');
   }
 }
