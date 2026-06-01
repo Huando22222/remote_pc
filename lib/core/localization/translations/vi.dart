@@ -6,55 +6,55 @@ class ViStrings extends AppStrings {
   @override
   String get touchpad => 'Touchpad';
   @override
-  String get keyboard => 'Ban phim';
+  String get keyboard => 'Bàn phím';
   @override
-  String get fileTransfer => 'Gui file';
+  String get fileTransfer => 'Gửi file';
   @override
   String get clipboard => 'Clipboard';
   @override
-  String get mediaControl => 'Dieu khien media';
+  String get mediaControl => 'Điều khiển media';
   @override
-  String get disconnect => 'Ngat ket noi';
+  String get disconnect => 'Ngắt kết nối';
   @override
-  String get settings => 'Cai dat';
+  String get settings => 'Cài đặt';
   @override
-  String get save => 'Luu';
+  String get save => 'Lưu';
   @override
-  String get cancel => 'Huy';
+  String get cancel => 'Hủy';
   @override
-  String get language => 'Ngon ngu';
+  String get language => 'Ngôn ngữ';
   @override
-  String get english => 'Tieng Anh';
+  String get english => 'Tiếng Anh';
   @override
-  String get vietnamese => 'Tieng Viet';
+  String get vietnamese => 'Tiếng Việt';
   @override
-  String get mouseSensitivity => 'Do nhay chuot';
+  String get mouseSensitivity => 'Độ nhạy chuột';
   @override
   String get mouseSensitivityDescription =>
-      'Dieu chinh toc do con tro PC khi re tren touchpad.';
+      'Điều chỉnh tốc độ con trỏ PC khi rê trên touchpad.';
   @override
-  String get scrollSensitivity => 'Do nhay cuon';
+  String get scrollSensitivity => 'Độ nhạy cuộn';
   @override
   String get scrollSensitivityDescription =>
-      'Dieu chinh toc do cuon bang hai ngon tren PC.';
+      'Điều chỉnh tốc độ cuộn bằng hai ngón trên PC.';
   @override
-  String get autoConnect => 'Tu dong ket noi';
+  String get autoConnect => 'Tự động kết nối';
   @override
   String get autoConnectDescription =>
-      'Tu ket noi lai PC gan nhat khi mo ung dung.';
+      'Tự kết nối lại PC gần nhất khi mở ứng dụng.';
   @override
-  String get reset => 'Dat lai';
+  String get reset => 'Đặt lại';
   @override
-  String get connection => 'Ket noi';
+  String get connection => 'Kết nối';
   @override
-  String get connectedDevice => 'Thiet bi dang ket noi';
+  String get connectedDevice => 'Thiết bị đang kết nối';
   @override
-  String get disconnected => 'Da ngat ket noi';
+  String get disconnected => 'Đã ngắt kết nối';
   @override
   String disconnectedMessage(int count) {
-    return count == 0 ? noClientConnected : 'Da ngat $count thiet bi.';
+    return count == 0 ? noClientConnected : 'Đã ngắt $count thiết bị.';
   }
 
   @override
-  String get noClientConnected => 'Khong co thiet bi nao dang ket noi.';
+  String get noClientConnected => 'Không có thiết bị nào đang kết nối.';
 }
