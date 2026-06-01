@@ -248,7 +248,6 @@ class _FeatureCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      minHeight: 92,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
