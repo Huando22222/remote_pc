@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pc_remote/core/config/routes.dart';
+import 'package:pc_remote/core/constants/app_links.dart';
 import 'package:pc_remote/core/helpers/in_app_notification_helper.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
 import 'package:pc_remote/features/connection/presentation/providers/connection_history_provider.dart';
@@ -11,6 +14,7 @@ import 'package:pc_remote/features/device/presentation/providers/remote_device_p
 import 'package:pc_remote/features/file_transfer/presentation/providers/downloaded_files_provider.dart';
 import 'package:pc_remote/features/file_transfer/presentation/widgets/downloaded_files_sheet.dart';
 import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   const ConnectionScreen({super.key});
@@ -135,7 +139,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _AppHeader(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
+              const _QuickActions(),
+              const SizedBox(height: 24),
               const _FeatureGrid(),
               const SizedBox(height: 28),
               _ConnectionCard(
@@ -162,6 +168,104 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActions extends StatelessWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _QuickActionButton(
+            icon: Icons.download_rounded,
+            label: 'Download desktop app',
+            onTap: _openDesktopDownloadLink,
+          ),
+        ),
+        const SizedBox(width: 10),
+        _IconQuickAction(
+          icon: Icons.settings_rounded,
+          tooltip: 'Settings',
+          onTap: () => context.go(Routes.settings),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openDesktopDownloadLink() async {
+    final uri = Uri.parse(AppLinks.desktopServerDownload);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
+
+class _QuickActionButton extends StatelessWidget {
+  const _QuickActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return FilledButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon),
+      label: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+      ),
+    );
+  }
+}
+
+class _IconQuickAction extends StatelessWidget {
+  const _IconQuickAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Tooltip(
+      message: tooltip,
+      child: IconButton.filledTonal(
+        onPressed: onTap,
+        icon: Icon(icon),
+        style: IconButton.styleFrom(
+          fixedSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          backgroundColor: colorScheme.secondaryContainer,
+          foregroundColor: colorScheme.onSecondaryContainer,
         ),
       ),
     );
@@ -358,7 +462,7 @@ class _ConnectionHistorySheet extends StatelessWidget {
               )
             else
               Flexible(
-                child: ListView.separated(
+                child: _ConnectionHistoryList(
                   shrinkWrap: true,
                   itemCount: history.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -392,6 +496,38 @@ class _ConnectionHistorySheet extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ConnectionHistoryList extends StatelessWidget {
+  const _ConnectionHistoryList({
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.separatorBuilder,
+    this.shrinkWrap = false,
+  });
+
+  final int itemCount;
+  final bool shrinkWrap;
+  final IndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder separatorBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: shrinkWrap ? MainAxisSize.min : MainAxisSize.max,
+        children: List.generate(itemCount, (index) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              itemBuilder(context, index),
+              if (index < itemCount - 1) separatorBuilder(context, index),
+            ],
+          );
+        }),
       ),
     );
   }
