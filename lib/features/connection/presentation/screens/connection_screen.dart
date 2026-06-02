@@ -134,16 +134,16 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         behavior: HitTestBehavior.translucent,
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(24, topPadding + 12, 24, 24),
+          padding: EdgeInsets.fromLTRB(24, topPadding, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _AppHeader(),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
               const _DesktopDownloadBanner(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               const _FeatureGrid(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 20),
               _ConnectionCard(
                 ipController: _ipController,
                 status: status,
@@ -154,9 +154,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 onAutoConnectChanged:
                     ref.read(appSettingsProvider.notifier).setAutoConnect,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
               _DownloadedFilesEntry(count: downloadedFiles.length),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
               Text(
                 'Make sure your phone and PC are on the same Wi-Fi network.',
                 textAlign: TextAlign.center,
