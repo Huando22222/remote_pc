@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pc_remote/core/constants/app_links.dart';
 import 'package:pc_remote/core/localization/locale_provider.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
@@ -19,137 +20,148 @@ class SettingsScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return ListView(
-      padding: AppSpacing.paddingLg,
-      children: [
-        Text(
-          strings.settings,
-          style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Text(strings.mouseSensitivity, style: tt.titleMedium),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          strings.mouseSensitivityDescription,
-          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: Slider(
-                min: 0.4,
-                max: 3.0,
-                divisions: 26,
-                value: settings.mouseSensitivity,
-                label: '${settings.mouseSensitivity.toStringAsFixed(1)}x',
-                onChanged: notifier.setMouseSensitivity,
-              ),
-            ),
-            SizedBox(
-              width: 56,
-              child: Text(
-                '${settings.mouseSensitivity.toStringAsFixed(1)}x',
-                textAlign: TextAlign.end,
-                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: notifier.resetMouseSensitivity,
-            icon: const Icon(Icons.restart_alt_rounded),
-            label: Text(strings.reset),
-          ),
-        ),
-        const Divider(height: AppSpacing.xl),
-        Text(strings.scrollSensitivity, style: tt.titleMedium),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          strings.scrollSensitivityDescription,
-          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: Slider(
-                min: 0.2,
-                max: 2.0,
-                divisions: 18,
-                value: settings.scrollSensitivity,
-                label: '${settings.scrollSensitivity.toStringAsFixed(1)}x',
-                onChanged: notifier.setScrollSensitivity,
-              ),
-            ),
-            SizedBox(
-              width: 56,
-              child: Text(
-                '${settings.scrollSensitivity.toStringAsFixed(1)}x',
-                textAlign: TextAlign.end,
-                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: notifier.resetScrollSensitivity,
-            icon: const Icon(Icons.restart_alt_rounded),
-            label: Text(strings.reset),
-          ),
-        ),
-        const Divider(height: AppSpacing.xl),
-        SwitchListTile(
-          value: settings.autoConnect,
-          onChanged: notifier.setAutoConnect,
-          contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.link_rounded),
-          title: Text(strings.autoConnect),
-          subtitle: Text(strings.autoConnectDescription),
-        ),
-        const Divider(height: AppSpacing.xl),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.desktop_windows_rounded),
-          title: Text(strings.desktopAppDownload),
-          subtitle: Text(strings.desktopAppDownloadDescription),
-          trailing: const Icon(Icons.open_in_new_rounded),
-          onTap: () => _openDesktopDownloadLink(),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FilledButton.icon(
-            onPressed: _openDesktopDownloadLink,
-            icon: const Icon(Icons.download_rounded),
-            label: Text(strings.openDownloadLink),
-          ),
-        ),
-        const Divider(height: AppSpacing.xl),
-        Text(strings.language, style: tt.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        SegmentedButton<String>(
-          segments: [
-            ButtonSegment(
-              value: 'vi',
-              icon: const Icon(Icons.language_rounded),
-              label: Text(strings.vietnamese),
-            ),
-            ButtonSegment(
-              value: 'en',
-              icon: const Icon(Icons.translate_rounded),
-              label: Text(strings.english),
-            ),
-          ],
-          selected: {locale.languageCode},
-          onSelectionChanged: (selection) {
-            localeNotifier.changeLocale(Locale(selection.first));
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: 'Back',
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
           },
         ),
-      ],
+        title: Text(strings.settings),
+      ),
+      body: ListView(
+        padding: AppSpacing.paddingLg,
+        children: [
+          Text(strings.mouseSensitivity, style: tt.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            strings.mouseSensitivityDescription,
+            style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  min: 0.4,
+                  max: 3.0,
+                  divisions: 26,
+                  value: settings.mouseSensitivity,
+                  label: '${settings.mouseSensitivity.toStringAsFixed(1)}x',
+                  onChanged: notifier.setMouseSensitivity,
+                ),
+              ),
+              SizedBox(
+                width: 56,
+                child: Text(
+                  '${settings.mouseSensitivity.toStringAsFixed(1)}x',
+                  textAlign: TextAlign.end,
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: notifier.resetMouseSensitivity,
+              icon: const Icon(Icons.restart_alt_rounded),
+              label: Text(strings.reset),
+            ),
+          ),
+          const Divider(height: AppSpacing.xl),
+          Text(strings.scrollSensitivity, style: tt.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            strings.scrollSensitivityDescription,
+            style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  min: 0.2,
+                  max: 2.0,
+                  divisions: 18,
+                  value: settings.scrollSensitivity,
+                  label: '${settings.scrollSensitivity.toStringAsFixed(1)}x',
+                  onChanged: notifier.setScrollSensitivity,
+                ),
+              ),
+              SizedBox(
+                width: 56,
+                child: Text(
+                  '${settings.scrollSensitivity.toStringAsFixed(1)}x',
+                  textAlign: TextAlign.end,
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: notifier.resetScrollSensitivity,
+              icon: const Icon(Icons.restart_alt_rounded),
+              label: Text(strings.reset),
+            ),
+          ),
+          const Divider(height: AppSpacing.xl),
+          SwitchListTile(
+            value: settings.autoConnect,
+            onChanged: notifier.setAutoConnect,
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.link_rounded),
+            title: Text(strings.autoConnect),
+            subtitle: Text(strings.autoConnectDescription),
+          ),
+          const Divider(height: AppSpacing.xl),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.desktop_windows_rounded),
+            title: Text(strings.desktopAppDownload),
+            subtitle: Text(strings.desktopAppDownloadDescription),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () => _openDesktopDownloadLink(),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              onPressed: _openDesktopDownloadLink,
+              icon: const Icon(Icons.download_rounded),
+              label: Text(strings.openDownloadLink),
+            ),
+          ),
+          const Divider(height: AppSpacing.xl),
+          Text(strings.language, style: tt.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          SegmentedButton<String>(
+            segments: [
+              ButtonSegment(
+                value: 'vi',
+                icon: const Icon(Icons.language_rounded),
+                label: Text(strings.vietnamese),
+              ),
+              ButtonSegment(
+                value: 'en',
+                icon: const Icon(Icons.translate_rounded),
+                label: Text(strings.english),
+              ),
+            ],
+            selected: {locale.languageCode},
+            onSelectionChanged: (selection) {
+              localeNotifier.changeLocale(Locale(selection.first));
+            },
+          ),
+        ],
+      ),
     );
   }
 

@@ -21,6 +21,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.connection,
         builder: (context, state) => const ConnectionScreen(),
       ),
+      GoRoute(
+        path: Routes.settings,
+        builder: (context, state) => const SettingsScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           return MainShellScreen(child: child);
@@ -43,10 +47,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           //   path: Routes.clipboard,
           //   builder: (context, state) => const ClipboardScreen(),
           // ),
-          GoRoute(
-            path: Routes.settings,
-            builder: (context, state) => const SettingsScreen(),
-          ),
         ],
       ),
     ],

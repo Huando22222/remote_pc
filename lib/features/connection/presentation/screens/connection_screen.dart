@@ -140,7 +140,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             children: [
               const _AppHeader(),
               const SizedBox(height: 18),
-              const _QuickActions(),
+              const _DesktopDownloadBanner(),
               const SizedBox(height: 24),
               const _FeatureGrid(),
               const SizedBox(height: 28),
@@ -174,101 +174,74 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   }
 }
 
-class _QuickActions extends StatelessWidget {
-  const _QuickActions();
+class _DesktopDownloadBanner extends StatelessWidget {
+  const _DesktopDownloadBanner();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickActionButton(
-            icon: Icons.download_rounded,
-            label: 'Download desktop app',
-            onTap: _openDesktopDownloadLink,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Material(
+      color: colorScheme.primaryContainer.withOpacity(0.65),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: _openDesktopDownloadLink,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  Icons.desktop_windows_rounded,
+                  color: colorScheme.onPrimary,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Need the desktop app?',
+                      style: textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Download Remote PC Server before connecting.',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer.withOpacity(0.72),
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(
+                Icons.open_in_new_rounded,
+                color: colorScheme.onPrimaryContainer,
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 10),
-        _IconQuickAction(
-          icon: Icons.settings_rounded,
-          tooltip: 'Settings',
-          onTap: () => context.go(Routes.settings),
-        ),
-      ],
+      ),
     );
   }
 
   Future<void> _openDesktopDownloadLink() async {
     final uri = Uri.parse(AppLinks.desktopServerDownload);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-}
-
-class _QuickActionButton extends StatelessWidget {
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return FilledButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon),
-      label: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
-    );
-  }
-}
-
-class _IconQuickAction extends StatelessWidget {
-  const _IconQuickAction({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Tooltip(
-      message: tooltip,
-      child: IconButton.filledTonal(
-        onPressed: onTap,
-        icon: Icon(icon),
-        style: IconButton.styleFrom(
-          fixedSize: const Size(48, 48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          backgroundColor: colorScheme.secondaryContainer,
-          foregroundColor: colorScheme.onSecondaryContainer,
-        ),
-      ),
-    );
   }
 }
 
@@ -316,6 +289,20 @@ class _AppHeader extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Tooltip(
+          message: 'Settings',
+          child: IconButton.filledTonal(
+            onPressed: () => context.go(Routes.settings),
+            icon: const Icon(Icons.settings_rounded),
+            style: IconButton.styleFrom(
+              fixedSize: const Size(48, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
           ),
         ),
       ],
