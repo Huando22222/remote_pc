@@ -43,6 +43,13 @@ class ViStrings extends AppStrings {
   String get autoConnectDescription =>
       'Tự kết nối lại PC gần nhất khi mở ứng dụng.';
   @override
+  String get desktopAppDownload => 'Ứng dụng desktop';
+  @override
+  String get desktopAppDownloadDescription =>
+      'Tải ứng dụng Remote PC Server cho máy tính của bạn.';
+  @override
+  String get openDownloadLink => 'Mở link tải';
+  @override
   String get reset => 'Đặt lại';
   @override
   String get connection => 'Kết nối';
