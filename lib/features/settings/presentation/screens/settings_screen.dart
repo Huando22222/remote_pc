@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pc_remote/core/constants/app_links.dart';
 import 'package:pc_remote/core/localization/locale_provider.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
 import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -110,6 +112,23 @@ class SettingsScreen extends ConsumerWidget {
           subtitle: Text(strings.autoConnectDescription),
         ),
         const Divider(height: AppSpacing.xl),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.desktop_windows_rounded),
+          title: Text(strings.desktopAppDownload),
+          subtitle: Text(strings.desktopAppDownloadDescription),
+          trailing: const Icon(Icons.open_in_new_rounded),
+          onTap: () => _openDesktopDownloadLink(),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            onPressed: _openDesktopDownloadLink,
+            icon: const Icon(Icons.download_rounded),
+            label: Text(strings.openDownloadLink),
+          ),
+        ),
+        const Divider(height: AppSpacing.xl),
         Text(strings.language, style: tt.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         SegmentedButton<String>(
@@ -132,5 +151,10 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _openDesktopDownloadLink() async {
+    final uri = Uri.parse(AppLinks.desktopServerDownload);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

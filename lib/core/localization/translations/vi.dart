@@ -43,6 +43,13 @@ class ViStrings extends AppStrings {
   String get autoConnectDescription =>
       'Tự kết nối lại PC gần nhất khi mở ứng dụng.';
   @override
+  String get desktopAppDownload => 'Ứng dụng desktop';
+  @override
+  String get desktopAppDownloadDescription =>
+      'Tải ứng dụng Remote PC Server cho máy tính của bạn.';
+  @override
+  String get openDownloadLink => 'Mở link tải';
+  @override
   String get reset => 'Đặt lại';
   @override
   String get connection => 'Kết nối';
@@ -57,16 +64,4 @@ class ViStrings extends AppStrings {
 
   @override
   String get noClientConnected => 'Không có thiết bị nào đang kết nối.';
-
-  @override
-  // TODO: implement desktopAppDownload
-  String get desktopAppDownload => throw UnimplementedError();
-
-  @override
-  // TODO: implement desktopAppDownloadDescription
-  String get desktopAppDownloadDescription => throw UnimplementedError();
-
-  @override
-  // TODO: implement openDownloadLink
-  String get openDownloadLink => throw UnimplementedError();
 }
