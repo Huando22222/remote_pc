@@ -43,6 +43,13 @@ class EnStrings extends AppStrings {
   String get autoConnectDescription =>
       'Reconnect automatically to the last PC when the app opens.';
   @override
+  String get desktopAppDownload => 'Desktop app';
+  @override
+  String get desktopAppDownloadDescription =>
+      'Download the Remote PC Server app for your computer.';
+  @override
+  String get openDownloadLink => 'Open download link';
+  @override
   String get reset => 'Reset';
   @override
   String get connection => 'Connection';

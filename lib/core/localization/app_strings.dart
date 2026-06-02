@@ -18,6 +18,9 @@ abstract class AppStrings {
   String get scrollSensitivityDescription;
   String get autoConnect;
   String get autoConnectDescription;
+  String get desktopAppDownload;
+  String get desktopAppDownloadDescription;
+  String get openDownloadLink;
   String get reset;
   String get connection;
   String get connectedDevice;
