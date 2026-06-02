@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pc_remote/core/config/routes.dart';
 import 'package:pc_remote/core/constants/app_links.dart';
 import 'package:pc_remote/core/localization/locale_provider.dart';
 import 'package:pc_remote/core/theme/app_spacing.dart';
+import 'package:pc_remote/features/connection/presentation/providers/connection_provider.dart';
+import 'package:pc_remote/features/connection/presentation/providers/connection_status.dart';
 import 'package:pc_remote/features/settings/presentation/providers/app_settings_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,13 +28,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: 'Back',
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          },
+          onPressed: () => _goBack(context, ref),
         ),
         title: Text(strings.settings),
       ),
@@ -168,5 +165,19 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _openDesktopDownloadLink() async {
     final uri = Uri.parse(AppLinks.desktopServerDownload);
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  void _goBack(BuildContext context, WidgetRef ref) {
+    if (Navigator.of(context).canPop()) {
+      context.pop();
+      return;
+    }
+
+    final status = ref.read(connectionNotifierProvider);
+    context.go(
+      status == ConnectionStatus.connected
+          ? Routes.touchpad
+          : Routes.connection,
+    );
   }
 }
