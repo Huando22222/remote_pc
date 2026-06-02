@@ -57,4 +57,16 @@ class ViStrings extends AppStrings {
 
   @override
   String get noClientConnected => 'Không có thiết bị nào đang kết nối.';
+
+  @override
+  // TODO: implement desktopAppDownload
+  String get desktopAppDownload => throw UnimplementedError();
+
+  @override
+  // TODO: implement desktopAppDownloadDescription
+  String get desktopAppDownloadDescription => throw UnimplementedError();
+
+  @override
+  // TODO: implement openDownloadLink
+  String get openDownloadLink => throw UnimplementedError();
 }
