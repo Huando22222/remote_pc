@@ -13,7 +13,52 @@ final selectedUploadFilesProvider =
   SelectedUploadFilesNotifier.new,
 );
 
-final uploadingFilesProvider = NotifierProvider<UploadingFilesNotifier, bool>(
+class UploadingFilesState {
+  const UploadingFilesState({
+    required this.uploading,
+    required this.currentFile,
+    required this.totalFiles,
+    required this.sentBytes,
+    required this.totalBytes,
+  });
+
+  const UploadingFilesState.idle()
+      : uploading = false,
+        currentFile = 0,
+        totalFiles = 0,
+        sentBytes = 0,
+        totalBytes = 0;
+
+  final bool uploading;
+  final int currentFile;
+  final int totalFiles;
+  final int sentBytes;
+  final int totalBytes;
+
+  double get progress {
+    if (totalBytes <= 0) return 0;
+    return (sentBytes / totalBytes).clamp(0, 1);
+  }
+
+  UploadingFilesState copyWith({
+    bool? uploading,
+    int? currentFile,
+    int? totalFiles,
+    int? sentBytes,
+    int? totalBytes,
+  }) {
+    return UploadingFilesState(
+      uploading: uploading ?? this.uploading,
+      currentFile: currentFile ?? this.currentFile,
+      totalFiles: totalFiles ?? this.totalFiles,
+      sentBytes: sentBytes ?? this.sentBytes,
+      totalBytes: totalBytes ?? this.totalBytes,
+    );
+  }
+}
+
+final uploadingFilesProvider =
+    NotifierProvider<UploadingFilesNotifier, UploadingFilesState>(
   UploadingFilesNotifier.new,
 );
 
@@ -73,12 +118,12 @@ class SelectedUploadFilesNotifier extends Notifier<List<SelectableFileEntity>> {
   }
 }
 
-class UploadingFilesNotifier extends Notifier<bool> {
+class UploadingFilesNotifier extends Notifier<UploadingFilesState> {
   @override
-  bool build() => false;
+  UploadingFilesState build() => const UploadingFilesState.idle();
 
   Future<void> uploadCheckedFiles() async {
-    if (state) return;
+    if (state.uploading) return;
 
     final remoteDevices = ref.read(remoteDeviceProvider);
     if (remoteDevices.isEmpty) {
@@ -101,23 +146,52 @@ class UploadingFilesNotifier extends Notifier<bool> {
       return;
     }
 
-    log('[UploadingFilesNotifier] uploading ${files.length} file(s)');
+    final fileSizes = <File, int>{};
+    var totalBytes = 0;
+    for (final file in files) {
+      final size = await file.length();
+      fileSizes[file] = size;
+      totalBytes += size;
+    }
 
-    state = true;
+    final batchId = DateTime.now().microsecondsSinceEpoch.toString();
+
+    log(
+      '[UploadingFilesNotifier] uploading ${files.length} file(s) batchId=$batchId totalBytes=$totalBytes',
+    );
+
+    state = UploadingFilesState(
+      uploading: true,
+      currentFile: 0,
+      totalFiles: files.length,
+      sentBytes: 0,
+      totalBytes: totalBytes,
+    );
 
     try {
-      for (final file in files) {
+      var completedBytes = 0;
+      for (var index = 0; index < files.length; index++) {
+        final file = files[index];
         log('[UploadingFilesNotifier] uploading file path=${file.path}');
+        state = state.copyWith(currentFile: index + 1);
         await ref.read(fileUploadDatasourceProvider).upload(
               file: file,
               serverIp: serverIp,
+              batchId: batchId,
+              fileIndex: index,
+              totalFiles: files.length,
+              onProgress: (sent, _) {
+                state = state.copyWith(sentBytes: completedBytes + sent);
+              },
             );
+        completedBytes += fileSizes[file] ?? 0;
+        state = state.copyWith(sentBytes: completedBytes);
       }
 
       selected.clearChecked();
       log('[UploadingFilesNotifier] upload finished');
     } finally {
-      state = false;
+      state = const UploadingFilesState.idle();
     }
   }
 }

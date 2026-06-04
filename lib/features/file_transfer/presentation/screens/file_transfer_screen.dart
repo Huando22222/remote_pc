@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,7 +15,7 @@ class FileTransferScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uploadFiles = ref.watch(selectedUploadFilesProvider);
-    final uploading = ref.watch(uploadingFilesProvider);
+    final uploadState = ref.watch(uploadingFilesProvider);
     final incomingFiles = ref.watch(incomingFilesProvider);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -42,7 +40,7 @@ class FileTransferScreen extends ConsumerWidget {
               children: [
                 _SendToPcSection(
                   files: uploadFiles,
-                  uploading: uploading,
+                  uploadState: uploadState,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Row(
@@ -138,17 +136,18 @@ class FileTransferScreen extends ConsumerWidget {
 class _SendToPcSection extends ConsumerWidget {
   const _SendToPcSection({
     required this.files,
-    required this.uploading,
+    required this.uploadState,
   });
 
   final List<SelectableFileEntity> files;
-  final bool uploading;
+  final UploadingFilesState uploadState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final hasChecked = files.any((file) => file.checked == true);
+    final uploading = uploadState.uploading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,6 +202,16 @@ class _SendToPcSection extends ConsumerWidget {
             ),
           ],
         ),
+        if (uploading) ...[
+          const SizedBox(height: AppSpacing.sm),
+          LinearProgressIndicator(value: uploadState.progress),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Sending file ${uploadState.currentFile}/${uploadState.totalFiles} '
+            '- ${(uploadState.progress * 100).toStringAsFixed(0)}%',
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+        ],
         const SizedBox(height: AppSpacing.sm),
         if (files.isEmpty)
           Container(
