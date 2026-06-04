@@ -20,7 +20,7 @@ class FileSocketHandler {
     socket.on(
       SocketConstants.eventFilesAvailable,
       (data) {
-        log('Files available: $data');
+        log('Files available raw: $data');
 
         final list = data['files'] as List;
 
@@ -31,6 +31,10 @@ class FileSocketHandler {
               ),
             )
             .toList();
+
+        log(
+          '[FileSocketHandler] decoded files_available files=${files.map((file) => file.name).toList()}',
+        );
 
         ref.read(incomingFilesProvider.notifier).addAll(files);
       },

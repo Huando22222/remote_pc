@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +19,12 @@ class FileDownloadDatasource {
   ) async {
     final dir = await _downloadDir();
 
-    final savePath = '${dir.path}${Platform.pathSeparator}${file.name}';
+    final fileName = _safeFileName(file.name);
+    final savePath = '${dir.path}${Platform.pathSeparator}$fileName';
+
+    log(
+      '[FileDownloadDatasource] download name=${file.name} safeName=$fileName url=${file.downloadUrl}',
+    );
 
     await _dio.download(
       file.downloadUrl,
@@ -40,5 +46,10 @@ class FileDownloadDatasource {
     }
 
     return dir;
+  }
+
+  String _safeFileName(String name) {
+    final sanitized = name.replaceAll('\\', '_').replaceAll('/', '_').trim();
+    return sanitized.isEmpty ? 'file.bin' : sanitized;
   }
 }
