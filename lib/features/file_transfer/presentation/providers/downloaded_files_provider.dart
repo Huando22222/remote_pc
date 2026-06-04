@@ -49,6 +49,11 @@ class DownloadedFilesNotifier extends Notifier<List<File>> {
     await _persist();
   }
 
+  Future<void> removeFile(File file) async {
+    state = state.where((item) => item.path != file.path).toList();
+    await _persist();
+  }
+
   Future<void> _persist() {
     return ref.read(sharedPrefsProvider).setStringList(
           PrefConstants.downloadedFilePaths,

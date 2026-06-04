@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/widgets/swipe_widget.dart';
 import '../../../../core/helpers/in_app_notification_helper.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../providers/downloaded_files_provider.dart';
 import '../providers/file_action_provider.dart';
@@ -47,6 +49,7 @@ class DownloadedFilesList extends ConsumerWidget {
     final files = ref.watch(downloadedFilesProvider);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final strings = ref.watch(stringsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -80,7 +83,30 @@ class DownloadedFilesList extends ConsumerWidget {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) {
-                    return DownloadedFileTile(file: files[index]);
+                    final file = files[index];
+                    return SwipeWidget(
+                      borderRadius: AppSpacing.radiusMd,
+                      actions: [
+                        SwipeAction(
+                          icon: Icons.delete_outline_rounded,
+                          label: strings.remove,
+                          onTap: () async {
+                            await ref
+                                .read(downloadedFilesProvider.notifier)
+                                .removeFile(file);
+                            if (!context.mounted) return;
+                            InAppNotificationHelper.info(
+                              context,
+                              title: strings.removedFromList,
+                              message: file.uri.pathSegments.last,
+                            );
+                          },
+                          backgroundColor: cs.error,
+                          foregroundColor: cs.onError,
+                        ),
+                      ],
+                      child: DownloadedFileTile(file: file),
+                    );
                   },
                 ),
         ),

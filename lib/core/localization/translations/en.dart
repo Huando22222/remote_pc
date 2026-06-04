@@ -64,4 +64,25 @@ class EnStrings extends AppStrings {
 
   @override
   String get noClientConnected => 'No devices were connected.';
+  @override
+  String get remove => 'Remove';
+  @override
+  String get fileUnavailable => 'File unavailable';
+  @override
+  String get fileUnavailableDescription =>
+      'File unavailable. It may still be in iCloud or was removed.';
+  @override
+  String get selectedFileMissingTitle => 'File unavailable';
+  @override
+  String selectedFileMissingMessage(String fileName) {
+    return 'File is no longer available on this device: $fileName';
+  }
+
+  @override
+  String selectedFilesMissingMessage(String fileNames) {
+    return 'Some files are no longer available on this device: $fileNames';
+  }
+
+  @override
+  String get removedFromList => 'Removed from list';
 }
