@@ -114,7 +114,8 @@ class _SwipeWidgetState extends State<SwipeWidget> {
             onHorizontalDragUpdate: _onHorizontalDragUpdate,
             onHorizontalDragEnd: _onHorizontalDragEnd,
             child: AnimatedSlide(
-              offset: Offset(-_dragOffset / MediaQuery.sizeOf(context).width, 0),
+              offset:
+                  Offset(-_dragOffset / MediaQuery.sizeOf(context).width, 0),
               duration: const Duration(milliseconds: 160),
               curve: Curves.easeOutCubic,
               child: widget.child,

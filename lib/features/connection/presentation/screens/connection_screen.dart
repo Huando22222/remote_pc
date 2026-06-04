@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pc_remote/common/widgets/swipe_widget.dart';
 import 'package:pc_remote/core/config/routes.dart';
 import 'package:pc_remote/core/constants/app_links.dart';
 import 'package:pc_remote/core/helpers/in_app_notification_helper.dart';
@@ -460,39 +461,39 @@ class _ConnectionHistorySheet extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final item = history[index];
-                    return ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    return SwipeWidget(
+                      actions: [
+                        SwipeAction(
+                          icon: Icons.delete_outline_rounded,
+                          label: 'Delete',
+                          backgroundColor: colorScheme.error,
+                          foregroundColor: colorScheme.onError,
+                          onTap: () => onDelete(item),
+                        ),
+                      ],
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        tileColor: colorScheme.surfaceContainerHighest
+                            .withOpacity(0.45),
+                        leading: const Icon(Icons.computer_rounded),
+                        title: Text(
+                          item.deviceName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          [
+                            item.ip,
+                            if (item.platform.isNotEmpty) item.platform,
+                          ].join(' • '),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => onSelected(item),
                       ),
-                      tileColor:
-                          colorScheme.surfaceContainerHighest.withOpacity(0.45),
-                      leading: const Icon(Icons.computer_rounded),
-                      title: Text(
-                        item.deviceName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        [
-                          item.ip,
-                          if (item.platform.isNotEmpty) item.platform,
-                        ].join(' • '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: 'Delete',
-                            icon: const Icon(Icons.delete_outline_rounded),
-                            color: colorScheme.error,
-                            onPressed: () => onDelete(item),
-                          ),
-                          const Icon(Icons.chevron_right_rounded),
-                        ],
-                      ),
-                      onTap: () => onSelected(item),
                     );
                   },
                 ),
