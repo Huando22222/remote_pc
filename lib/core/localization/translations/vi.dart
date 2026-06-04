@@ -64,4 +64,25 @@ class ViStrings extends AppStrings {
 
   @override
   String get noClientConnected => 'Không có thiết bị nào đang kết nối.';
+  @override
+  String get remove => 'Xóa';
+  @override
+  String get fileUnavailable => 'File không khả dụng';
+  @override
+  String get fileUnavailableDescription =>
+      'File không khả dụng. File có thể vẫn đang ở iCloud hoặc đã bị xóa.';
+  @override
+  String get selectedFileMissingTitle => 'File không khả dụng';
+  @override
+  String selectedFileMissingMessage(String fileName) {
+    return 'File không còn tồn tại trên thiết bị này: $fileName';
+  }
+
+  @override
+  String selectedFilesMissingMessage(String fileNames) {
+    return 'Một số file không còn tồn tại trên thiết bị này: $fileNames';
+  }
+
+  @override
+  String get removedFromList => 'Đã xóa khỏi danh sách';
 }

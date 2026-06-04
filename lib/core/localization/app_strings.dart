@@ -27,4 +27,11 @@ abstract class AppStrings {
   String get disconnected;
   String disconnectedMessage(int count);
   String get noClientConnected;
+  String get remove;
+  String get fileUnavailable;
+  String get fileUnavailableDescription;
+  String get selectedFileMissingTitle;
+  String selectedFileMissingMessage(String fileName);
+  String selectedFilesMissingMessage(String fileNames);
+  String get removedFromList;
 }

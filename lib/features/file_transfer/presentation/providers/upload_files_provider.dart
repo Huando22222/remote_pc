@@ -57,6 +57,21 @@ class UploadingFilesState {
   }
 }
 
+class MissingUploadFilesException implements Exception {
+  const MissingUploadFilesException(this.fileNames);
+
+  final List<String> fileNames;
+
+  @override
+  String toString() {
+    if (fileNames.length == 1) {
+      return 'File is no longer available on this device: ${fileNames.first}';
+    }
+
+    return 'Some files are no longer available on this device: ${fileNames.join(', ')}';
+  }
+}
+
 final uploadingFilesProvider =
     NotifierProvider<UploadingFilesNotifier, UploadingFilesState>(
   UploadingFilesNotifier.new,
@@ -110,11 +125,12 @@ class SelectedUploadFilesNotifier extends Notifier<List<SelectableFileEntity>> {
     state = state.where((item) => !item.checked).toList();
   }
 
+  List<SelectableFileEntity> get checkedItems {
+    return state.where((item) => item.checked).toList();
+  }
+
   List<File> get checkedFiles {
-    return state
-        .where((item) => item.checked)
-        .map((item) => item.file)
-        .toList();
+    return checkedItems.map((item) => item.file).toList();
   }
 }
 
@@ -139,7 +155,8 @@ class UploadingFilesNotifier extends Notifier<UploadingFilesState> {
     );
 
     final selected = ref.read(selectedUploadFilesProvider.notifier);
-    final files = selected.checkedFiles;
+    final checkedItems = selected.checkedItems;
+    final files = checkedItems.map((item) => item.file).toList();
 
     if (files.isEmpty) {
       log('[UploadingFilesNotifier] no checked files to upload');
@@ -147,11 +164,35 @@ class UploadingFilesNotifier extends Notifier<UploadingFilesState> {
     }
 
     final fileSizes = <File, int>{};
+    final missingItems = <SelectableFileEntity>[];
     var totalBytes = 0;
-    for (final file in files) {
-      final size = await file.length();
-      fileSizes[file] = size;
-      totalBytes += size;
+    for (final item in checkedItems) {
+      final file = item.file;
+      try {
+        if (!await file.exists()) {
+          missingItems.add(item);
+          continue;
+        }
+
+        final size = await file.length();
+        fileSizes[file] = size;
+        totalBytes += size;
+      } on FileSystemException {
+        missingItems.add(item);
+      }
+    }
+
+    if (missingItems.isNotEmpty) {
+      for (final item in missingItems) {
+        selected.remove(item.id);
+      }
+
+      final names = missingItems
+          .map((item) => item.file.uri.pathSegments.last)
+          .where((name) => name.isNotEmpty)
+          .toList();
+      log('[UploadingFilesNotifier] missing selected files names=$names');
+      throw MissingUploadFilesException(names);
     }
 
     final batchId = DateTime.now().microsecondsSinceEpoch.toString();

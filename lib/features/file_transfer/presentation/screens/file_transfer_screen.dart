@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../common/widgets/swipe_widget.dart';
 import '../../../../core/helpers/in_app_notification_helper.dart';
+import '../../../../core/localization/locale_provider.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/selectable_file_entity.dart';
 import '../providers/downloaded_files_provider.dart';
@@ -148,6 +152,7 @@ class _SendToPcSection extends ConsumerWidget {
     final tt = Theme.of(context).textTheme;
     final hasChecked = files.any((file) => file.checked == true);
     final uploading = uploadState.uploading;
+    final strings = ref.watch(stringsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -182,6 +187,15 @@ class _SendToPcSection extends ConsumerWidget {
                           context,
                           title: 'Files sent',
                           message: 'Selected files were sent to PC.',
+                        );
+                      } on MissingUploadFilesException catch (e) {
+                        final fileNames = e.fileNames.join(', ');
+                        InAppNotificationHelper.error(
+                          context,
+                          title: strings.selectedFileMissingTitle,
+                          message: e.fileNames.length == 1
+                              ? strings.selectedFileMissingMessage(fileNames)
+                              : strings.selectedFilesMissingMessage(fileNames),
                         );
                       } catch (e) {
                         InAppNotificationHelper.error(
@@ -230,7 +244,23 @@ class _SendToPcSection extends ConsumerWidget {
           ...files.map(
             (item) => Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: _UploadFileTile(item: item),
+              child: SwipeWidget(
+                borderRadius: AppSpacing.radiusMd,
+                actions: [
+                  SwipeAction(
+                    icon: Icons.delete_outline_rounded,
+                    label: strings.remove,
+                    onTap: () {
+                      ref
+                          .read(selectedUploadFilesProvider.notifier)
+                          .remove(item.id);
+                    },
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                  ),
+                ],
+                child: _UploadFileTile(item: item),
+              ),
             ),
           ),
       ],
@@ -247,37 +277,63 @@ class _UploadFileTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final file = item.file;
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final strings = ref.watch(stringsProvider);
     final name = file.uri.pathSegments.last;
 
-    return Card(
-      child: CheckboxListTile(
-        value: item.checked,
-        onChanged: (_) {
-          ref.read(selectedUploadFilesProvider.notifier).toggle(item.id);
-        },
-        secondary: Icon(
-          Icons.insert_drive_file_rounded,
-          color: cs.primary,
-        ),
-        title: Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: FutureBuilder<int>(
-          future: file.length(),
-          builder: (context, snapshot) {
-            final size = snapshot.data;
-            return Text(
-              size == null ? file.path : '${_formatSize(size)} - ${file.path}',
+    return FutureBuilder<_UploadFileStatus>(
+      future: _readStatus(file),
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        final missing = status?.missing ?? false;
+        final size = status?.size;
+
+        return Card(
+          child: CheckboxListTile(
+            value: item.checked,
+            onChanged: (_) {
+              ref.read(selectedUploadFilesProvider.notifier).toggle(item.id);
+            },
+            secondary: Icon(
+              missing
+                  ? Icons.error_outline_rounded
+                  : Icons.insert_drive_file_rounded,
+              color: missing ? cs.error : cs.primary,
+            ),
+            title: Text(
+              name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            );
-          },
-        ),
-        controlAffinity: ListTileControlAffinity.leading,
-      ),
+            ),
+            subtitle: Text(
+              missing
+                  ? strings.fileUnavailableDescription
+                  : size == null
+                      ? file.path
+                      : '${_formatSize(size)} - ${file.path}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: missing
+                  ? tt.bodySmall?.copyWith(color: cs.error)
+                  : tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
+        );
+      },
     );
+  }
+
+  Future<_UploadFileStatus> _readStatus(File file) async {
+    try {
+      if (!await file.exists()) {
+        return const _UploadFileStatus(missing: true);
+      }
+
+      return _UploadFileStatus(size: await file.length());
+    } on FileSystemException {
+      return const _UploadFileStatus(missing: true);
+    }
   }
 
   String _formatSize(int bytes) {
@@ -287,4 +343,14 @@ class _UploadFileTile extends ConsumerWidget {
     }
     return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
   }
+}
+
+class _UploadFileStatus {
+  const _UploadFileStatus({
+    this.size,
+    this.missing = false,
+  });
+
+  final int? size;
+  final bool missing;
 }
