@@ -748,31 +748,36 @@ class _QrScannerPageState extends State<QrScannerPage> {
       ),
       body: Stack(
         children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onScaleStart: (details) {
-              if (details.pointerCount < 2) return;
-              _baseZoomScale = _zoomScale;
-            },
-            onScaleUpdate: (details) {
-              if (details.pointerCount < 2) return;
-              final nextZoom =
-                  (_baseZoomScale + (details.scale - 1) * 0.7).clamp(0.0, 1.0);
-              if ((nextZoom - _zoomScale).abs() < 0.01) return;
-              setState(() => _zoomScale = nextZoom);
-              _scannerController.setZoomScale(nextZoom);
-            },
-            child: MobileScanner(
-              controller: _scannerController,
-              onDetect: _onDetect,
-            ),
+          MobileScanner(
+            controller: _scannerController,
+            onDetect: _onDetect,
           ),
-          const _ScannerOverlay(),
+          const IgnorePointer(child: _ScannerOverlay()),
           Positioned(
             left: 24,
             right: 24,
             bottom: 28,
             child: _ZoomIndicator(zoomScale: _zoomScale),
+          ),
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onScaleStart: (details) {
+                if (details.pointerCount < 2) return;
+                _baseZoomScale = _zoomScale;
+              },
+              onScaleUpdate: (details) {
+                if (details.pointerCount < 2) return;
+                final nextZoom =
+                    (_baseZoomScale + (details.scale - 1) * 0.7).clamp(
+                  0.0,
+                  1.0,
+                );
+                if ((nextZoom - _zoomScale).abs() < 0.01) return;
+                setState(() => _zoomScale = nextZoom);
+                _scannerController.setZoomScale(nextZoom);
+              },
+            ),
           ),
         ],
       ),
