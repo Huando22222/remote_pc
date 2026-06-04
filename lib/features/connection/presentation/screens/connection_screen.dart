@@ -101,6 +101,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 _ipController.text = entry.ip;
                 _handleConnect();
               },
+              onDelete: (entry) {
+                ref.read(connectionHistoryProvider.notifier).removeIp(entry.ip);
+              },
             );
           },
         );
@@ -411,10 +414,12 @@ class _ConnectionHistorySheet extends StatelessWidget {
   const _ConnectionHistorySheet({
     required this.history,
     required this.onSelected,
+    required this.onDelete,
   });
 
   final List<ConnectionHistoryEntry> history;
   final ValueChanged<ConnectionHistoryEntry> onSelected;
+  final ValueChanged<ConnectionHistoryEntry> onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -475,7 +480,18 @@ class _ConnectionHistorySheet extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: 'Delete',
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            color: colorScheme.error,
+                            onPressed: () => onDelete(item),
+                          ),
+                          const Icon(Icons.chevron_right_rounded),
+                        ],
+                      ),
                       onTap: () => onSelected(item),
                     );
                   },
@@ -650,6 +666,8 @@ class QrScannerPage extends StatefulWidget {
 class _QrScannerPageState extends State<QrScannerPage> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _handled = false;
+  double _zoomScale = 0;
+  double _baseZoomScale = 0;
 
   @override
   void dispose() {
@@ -725,12 +743,66 @@ class _QrScannerPageState extends State<QrScannerPage> {
       ),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: _scannerController,
-            onDetect: _onDetect,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onScaleStart: (details) {
+              if (details.pointerCount < 2) return;
+              _baseZoomScale = _zoomScale;
+            },
+            onScaleUpdate: (details) {
+              if (details.pointerCount < 2) return;
+              final nextZoom =
+                  (_baseZoomScale + (details.scale - 1) * 0.7).clamp(0.0, 1.0);
+              if ((nextZoom - _zoomScale).abs() < 0.01) return;
+              setState(() => _zoomScale = nextZoom);
+              _scannerController.setZoomScale(nextZoom);
+            },
+            child: MobileScanner(
+              controller: _scannerController,
+              onDetect: _onDetect,
+            ),
           ),
           const _ScannerOverlay(),
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 28,
+            child: _ZoomIndicator(zoomScale: _zoomScale),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _ZoomIndicator extends StatelessWidget {
+  const _ZoomIndicator({required this.zoomScale});
+
+  final double zoomScale;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Center(
+        child: AnimatedOpacity(
+          opacity: zoomScale > 0.02 ? 1 : 0,
+          duration: const Duration(milliseconds: 160),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.62),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              'Zoom ${(1 + zoomScale * 3).toStringAsFixed(1)}x',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

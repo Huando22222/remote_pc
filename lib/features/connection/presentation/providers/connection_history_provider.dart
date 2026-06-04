@@ -103,6 +103,11 @@ class ConnectionHistoryNotifier extends Notifier<List<ConnectionHistoryEntry>> {
     return upsertIp(ip, device: device);
   }
 
+  Future<void> removeIp(String ip) async {
+    state = state.where((item) => item.ip != ip).toList(growable: false);
+    await _persist();
+  }
+
   Future<void> _persist() {
     final raw = jsonEncode(state.map((item) => item.toJson()).toList());
     return ref
