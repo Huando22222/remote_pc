@@ -68,6 +68,12 @@ class _SwipeWidgetState extends State<SwipeWidget> {
       child: Stack(
         alignment: Alignment.centerRight,
         children: [
+          IgnorePointer(
+            child: Opacity(
+              opacity: 0,
+              child: widget.child,
+            ),
+          ),
           Positioned.fill(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -108,16 +114,18 @@ class _SwipeWidgetState extends State<SwipeWidget> {
               }).toList(),
             ),
           ),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _close,
-            onHorizontalDragUpdate: _onHorizontalDragUpdate,
-            onHorizontalDragEnd: _onHorizontalDragEnd,
-            child: AnimatedSlide(
-              offset:
-                  Offset(-_dragOffset / MediaQuery.sizeOf(context).width, 0),
-              duration: const Duration(milliseconds: 160),
-              curve: Curves.easeOutCubic,
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOutCubic,
+            left: -_dragOffset,
+            right: _dragOffset,
+            top: 0,
+            bottom: 0,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _dragOffset > 0 ? _close : null,
+              onHorizontalDragUpdate: _onHorizontalDragUpdate,
+              onHorizontalDragEnd: _onHorizontalDragEnd,
               child: widget.child,
             ),
           ),

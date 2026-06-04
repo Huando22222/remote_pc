@@ -475,8 +475,7 @@ class _ConnectionHistorySheet extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        tileColor: colorScheme.surfaceContainerHighest
-                            .withOpacity(0.45),
+                        tileColor: colorScheme.surfaceContainerHighest,
                         leading: const Icon(Icons.computer_rounded),
                         title: Text(
                           item.deviceName,
