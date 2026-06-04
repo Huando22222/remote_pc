@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class TransferFileMetaEntity {
   final String id;
   final String name;
@@ -17,6 +19,7 @@ class TransferFileMetaEntity {
     return {
       'id': id,
       'name': name,
+      'nameBase64': base64Encode(utf8.encode(name)),
       'size': size,
       'extension': extension,
       'downloadUrl': downloadUrl,
@@ -26,13 +29,33 @@ class TransferFileMetaEntity {
   factory TransferFileMetaEntity.fromJson(
     Map<String, dynamic> json,
   ) {
+    final decodedName = _readName(json);
     return TransferFileMetaEntity(
       id: json['id'],
-      name: json['name'],
+      name: decodedName,
       size: json['size'],
-      extension: json['extension'],
+      extension: json['extension'] ?? _extensionOf(decodedName),
       downloadUrl: json['downloadUrl'],
     );
+  }
+
+  static String _readName(Map<String, dynamic> json) {
+    final nameBase64 = json['nameBase64'];
+    if (nameBase64 is String && nameBase64.isNotEmpty) {
+      try {
+        return utf8.decode(base64Decode(nameBase64));
+      } catch (_) {
+        // Fall back to the legacy plain-text name below.
+      }
+    }
+
+    return json['name'] ?? 'file.bin';
+  }
+
+  static String _extensionOf(String name) {
+    final index = name.lastIndexOf('.');
+    if (index == -1) return '';
+    return name.substring(index);
   }
 }
 // {
