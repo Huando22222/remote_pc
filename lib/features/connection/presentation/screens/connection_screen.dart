@@ -471,27 +471,32 @@ class _ConnectionHistorySheet extends StatelessWidget {
                           onTap: () => onDelete(item),
                         ),
                       ],
-                      child: ListTile(
+                      child: Material(
+                        color: colorScheme.surface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: colorScheme.outlineVariant),
                         ),
-                        tileColor: colorScheme.surfaceContainerHighest,
-                        leading: const Icon(Icons.computer_rounded),
-                        title: Text(
-                          item.deviceName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        clipBehavior: Clip.antiAlias,
+                        child: ListTile(
+                          tileColor: colorScheme.surface,
+                          leading: const Icon(Icons.computer_rounded),
+                          title: Text(
+                            item.deviceName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            [
+                              item.ip,
+                              if (item.platform.isNotEmpty) item.platform,
+                            ].join(' • '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => onSelected(item),
                         ),
-                        subtitle: Text(
-                          [
-                            item.ip,
-                            if (item.platform.isNotEmpty) item.platform,
-                          ].join(' • '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: const Icon(Icons.chevron_right_rounded),
-                        onTap: () => onSelected(item),
                       ),
                     );
                   },
