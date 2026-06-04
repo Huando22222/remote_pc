@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -34,7 +35,7 @@ class FileUploadDatasource {
     required int totalFiles,
     void Function(int sent, int total)? onProgress,
   }) async {
-    final name = file.uri.pathSegments.last;
+    final name = _fileNameOf(file);
     final size = await file.length();
     final url = 'http://$serverIp:${ApiConstants.httpPort}/upload';
 
@@ -47,6 +48,7 @@ class FileUploadDatasource {
         options: Options(
           headers: {
             'x-file-name': Uri.encodeComponent(name),
+            'x-file-name-base64': base64Encode(utf8.encode(name)),
             'x-upload-batch-id': batchId,
             'x-upload-file-index': fileIndex,
             'x-upload-total-files': totalFiles,
@@ -74,5 +76,14 @@ class FileUploadDatasource {
       log('[FileUploadDatasource] upload failed name=$name status=$statusCode error=$e');
       rethrow;
     }
+  }
+
+  String _fileNameOf(File file) {
+    final normalizedPath = file.path.replaceAll('\\', '/');
+    final parts = normalizedPath
+        .split('/')
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
+    return parts.isEmpty ? 'file.bin' : parts.last;
   }
 }
