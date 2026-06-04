@@ -29,6 +29,10 @@ class FileUploadDatasource {
   Future<void> upload({
     required File file,
     required String serverIp,
+    required String batchId,
+    required int fileIndex,
+    required int totalFiles,
+    void Function(int sent, int total)? onProgress,
   }) async {
     final name = file.uri.pathSegments.last;
     final size = await file.length();
@@ -43,10 +47,14 @@ class FileUploadDatasource {
         options: Options(
           headers: {
             'x-file-name': Uri.encodeComponent(name),
+            'x-upload-batch-id': batchId,
+            'x-upload-file-index': fileIndex,
+            'x-upload-total-files': totalFiles,
             Headers.contentLengthHeader: size,
           },
           contentType: 'application/octet-stream',
         ),
+        onSendProgress: onProgress,
       );
 
       log('[FileUploadDatasource] upload completed status=${response.statusCode} name=$name');
