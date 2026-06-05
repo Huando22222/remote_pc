@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
->
+    xmlns:tools="http://schemas.android.com/tools">
+
   <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
   <application android:label="Remote PC" android:name="${applicationName}" android:icon="@mipmap/launcher_icon" android:usesCleartextTraffic="true">
     <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:screenOrientation="portrait" android:taskAffinity="" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
       <!-- Specifies an Android theme to apply to this Activity as soon as
@@ -28,5 +33,4 @@
       <data android:mimeType="text/plain"/>
     </intent>
   </queries>
-  <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
